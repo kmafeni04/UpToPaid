@@ -1,0 +1,15 @@
+.btn {
+  display: flex;
+  align-items: center;
+  border: solid 1px black;
+  background-color: transparent;
+  border-radius: 0.5rem;
+  padding-inline: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.btn--inverse {
+  background-color: black;
+  color: var(--font-color-inverse);
+}

@@ -4,11 +4,20 @@
 {% local layout = require ".layout-nelt" %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
-<div class="flex w-screen justify-between p-4"><img src="/static/images/naira-coin-small.svg" class="h-12" alt="" />
-  <a href="{{ self:url_for('login') }}"
-    class="border rounded flex items-center justify-center p-2 font-bold hover:bg-black hover:text-white transition duration-100">login</a>
+<div>
+  <style>
+    me {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem;
+      & img {
+        width: 3rem;
+      }
+    }
+  </style>
+  <img src="/static/images/naira-coin-small.svg" class="h-12" alt="" />
+  <a href="{{ self:url_for('login') }}" class="btn btn--inverse">Log in</a>
 </div>
-s
 {% end %}
 
 {% local function index(tp: *nelt.Template, self: *http.Server) %}
