@@ -74,7 +74,7 @@
 {% end %}
 
 {% local function index(tp: *nelt.Template, self: *http.Server) %}
-{% layout(tp, "SabiFinance", content, self) %}
+{% layout(tp, "", content, self) %}
 {% end %}
 
 {% return index %}

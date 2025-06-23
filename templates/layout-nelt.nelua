@@ -12,7 +12,7 @@ tp:write([[<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>]])
-tp:escape(title)
+tp:escape(title ~= "" and title or "SabiFinance")
 tp:write([[</title>
   <link rel="icon" href="/static/images/naira-coin-small.svg" type="image/svg+xml" />
   <script type="module"

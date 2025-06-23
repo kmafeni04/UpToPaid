@@ -1,0 +1,12 @@
+{% local nelt = require "..vendor.nelt.nelt" %}
+{% local http = require "..vendor.http-nelua.http"%}
+{% local layout = require ".layout-nelt" %}
+
+{% local function content(tp: *nelt.Template, self: *http.Server) %}
+{% end %}
+
+{% local function signup(tp: *nelt.Template, self: *http.Server) %}
+{% layout(tp, "", content, self) %}
+{% end %}
+
+{% return signup %}

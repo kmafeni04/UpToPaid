@@ -5,7 +5,6 @@ local nelt = require ".vendor.nelt.nelt"
 
 require ".thirdparty.inline_map"
 
-
 ## if PROD then
 -- postgres
 ## else
@@ -58,7 +57,10 @@ app:get("login", "/login", function(self: *http.Server): http.Response
 end)
 
 app:get("signup", "/signup", function(self: *http.Server): http.Response
-  return self:html(http.Status.OK, "signup")
+  local signup = require ".templates.signup-nelt"
+  local tp: nelt.Template
+  signup(&tp, self)
+  return self:html(http.Status.OK, tp:tostring())
 end)
 
 app:serve()

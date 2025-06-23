@@ -1,0 +1,30 @@
+require "string"
+
+require "..thirdparty.crypt"
+
+local bcrypt = @record{}
+
+function bcrypt.encrypt(str: string): (string, string)
+  local salt = crypt_gensalt("$2b$", 9, nilptr, 0)
+  if salt == nilptr then
+    return  "Failed to gen salt"
+  end
+  local hash = crypt(str, salt)
+  if hash == nilptr then
+    return  "Failed to create hash"
+  end
+  return string.copy(hash)
+end
+
+function bcrypt.verify(str: string, hash: string): string
+  local new_hash = crypt(str, hash)
+  if new_hash == nilptr then
+    return  "Failed to create hash"
+  end
+  if not hash == new_hash then
+    return "string does not match hash"
+  end
+  return ""
+end
+
+return bcrypt
