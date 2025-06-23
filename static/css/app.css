@@ -8,7 +8,14 @@
 
   --clr-gray: rgba(120, 120, 120);
 
-  --transition-1: 0.2s;
+  --transition-xs: 0.2s;
+
+  --radius-xs: 0.5rem;
+
+  --padding-sm: 1rem;
+  --padding-md: 2rem;
+  --padding-lg: 3rem;
+  --padding-xl: 4rem;
 
   --gap-xs: 0.5rem;
   --gap-sm: 1rem;
@@ -117,32 +124,53 @@ code {
   font-family: monospace;
 }
 
+h1 {
+  font-size: var(--font-lg);
+}
+
+h2 {
+  font-size: var(--font-md);
+}
+
+p {
+  font-size: var(--font-sm);
+}
+
 .btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   border: solid 1px black;
   background-color: transparent;
-  height: 3rem;
-  padding-inline: 1rem;
-  border-radius: 0.5rem;
+  height: 2.5rem;
+  padding-inline: var(--padding-sm);
+  border-radius: var(--radius-xs);
   font-weight: bold;
   text-decoration: none;
-  transition: var(--transition-1);
+  transition: var(--transition-xs);
 }
 
 .btn:hover {
   background-color: black;
   color: var(--font-color-inverse);
-  transition: var(--transition-1);
+  transition: var(--transition-xs);
 }
 
 .btn--inverse {
   background-color: black;
   color: var(--font-color-inverse);
-  transition: var(--transition-1);
+  transition: var(--transition-xs);
 }
 .btn--inverse:hover {
   background-color: transparent;
   color: var(--font-color);
-  transition: var(--transition-1);
+  transition: var(--transition-xs);
+}
+
+.input {
+  border: solid 1px black;
+  background-color: transparent;
+  height: 2.5rem;
+  padding-inline: var(--padding-sm);
+  border-radius: var(--radius-xs);
 }

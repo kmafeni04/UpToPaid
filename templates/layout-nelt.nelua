@@ -65,9 +65,65 @@ tp:write([[</title>
   </script>
 </head>
 
-<body>]])
+<body>
+  <div>
+    <style>
+      me {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: black;
+        position: fixed;
+        height: 5rem;
+        padding-block: var(--padding-sm);
+        padding-inline: var(--padding-md);
+        width: 100svw;
+
+        & img {
+          width: 3rem;
+        }
+      }
+    </style>
+    <a href="]])
+tp:escape(self:url_for('index'))
+tp:write([["><img src="/static/images/naira-coin-small.svg" class="h-12" alt="" /></a>
+    <div>
+      <style>
+        me {
+          display: flex;
+          gap: var(--gap-sm);
+
+          & .btn--inverse {
+            border: solid 1px white
+          }
+
+          & .btn--inverse:hover {
+            color: var(--font-color);
+            background-color: white;
+          }
+        }
+      </style>
+      <a href="]])
+tp:escape(self:url_for('login'))
+tp:write([[" class="btn btn--inverse">Log in</a>
+      <a href="]])
+tp:escape(self:url_for('signup'))
+tp:write([[" class="btn btn--inverse">Sign Up</a>
+    </div>
+  </div>
+  <main>
+    <style>
+      me {
+        padding-top: 5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100svh;
+      }
+    </style>]])
 content(tp, self)
-tp:write([[</body>
+tp:write([[</main>
+</body>
 
 </html>]])
 end
