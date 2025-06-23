@@ -1,0 +1,12 @@
+[submodule "vendor/http-nelua"]
+	path = vendor/http-nelua
+	url = https://github.com/kmafeni04/http-nelua
+[submodule "vendor/norm"]
+	path = vendor/norm
+	url = https://github.com/kmafeni04/norm
+[submodule "vendor/nelt"]
+	path = vendor/nelt
+	url = https://github.com/kmafeni04/nelt
+[submodule "vendor/html-nelua"]
+	path = vendor/html-nelua
+	url = https://github.com/kmafeni04/html-nelua

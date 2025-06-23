@@ -1,0 +1,16 @@
+local nelt = require "..vendor.nelt.nelt"
+local http = require "..vendor.http-nelua.http"
+local layout = require ".layout-nelt"
+local function content(tp: *nelt.Template, self: *http.Server)
+tp:write([[<div class="flex w-screen justify-between p-4"><img src="/static/images/naira-coin-small.svg" class="h-12" alt="" />
+  <a href="]])
+tp:escape(self:url_for('login'))
+tp:write([["
+    class="border rounded flex items-center justify-center p-2 font-bold hover:bg-black hover:text-white transition duration-100">login</a>
+</div>
+s]])
+end
+local function index(tp: *nelt.Template, self: *http.Server)
+layout(tp, "SabiFinance", content, self)
+end
+return index

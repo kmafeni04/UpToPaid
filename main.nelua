@@ -1,0 +1,52 @@
+local http = require ".vendor.http-nelua.http"
+local datastar = require ".vendor.http-nelua.extras.datastar.datastar"
+local norm = require ".vendor.norm.norm"
+local nelt = require ".vendor.nelt.nelt"
+
+
+## if PROD then
+-- postgres
+## else
+local db, err = norm.Db.new({
+  kind = norm.DbKind.sqlite,
+  conn = {
+    sqlite = {
+      name = "app.db"
+    }
+  }
+})
+local schema = norm.Schema
+local type = schema.ColumnType
+
+local err = norm.migrate(db, {
+  {
+    "1750497533",
+    function(db: norm.Db): string
+      local err = schema.create_table(db, "users", {
+        {"id", type.integer, { primary_key = true }},
+        {"username", type.text, { unique = true }},
+        {"email", type.text, { unique = true }},
+        {"password", type.text}
+      })
+      return err
+    end
+  }
+})
+## end
+
+local app = http.new({
+  port = 8081
+})
+
+app:get("index", "/", function(self: *http.Server): http.Response
+  local index = require ".templates.index-nelt"
+  local tp: nelt.Template
+  index(&tp, self)
+  return self:html(http.Status.OK, tp:tostring())
+end)
+
+app:get("login", "/login", function(self: *http.Server): http.Response
+  return self:html(http.Status.OK, "login")
+end)
+
+app:serve()
