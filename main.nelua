@@ -3,6 +3,8 @@ local datastar = require ".vendor.http-nelua.extras.datastar.datastar"
 local norm = require ".vendor.norm.norm"
 local nelt = require ".vendor.nelt.nelt"
 
+require ".thirdparty.inline_map"
+
 
 ## if PROD then
 -- postgres
@@ -38,6 +40,12 @@ local app = http.new({
   port = 8081
 })
 
+## if not PROD then
+app.static_headers = inline_map!(string, string, {
+  ["Cache-Control"] = ""
+})
+## end
+
 app:get("index", "/", function(self: *http.Server): http.Response
   local index = require ".templates.index-nelt"
   local tp: nelt.Template
@@ -47,6 +55,10 @@ end)
 
 app:get("login", "/login", function(self: *http.Server): http.Response
   return self:html(http.Status.OK, "login")
+end)
+
+app:get("signup", "/signup", function(self: *http.Server): http.Response
+  return self:html(http.Status.OK, "signup")
 end)
 
 app:serve()

@@ -1,6 +1,24 @@
+@import "https://www.nerdfonts.com/assets/css/webfont.css";
+
 :root {
   --clr-dark-900: black;
   --clr-light-900: white;
+
+  --bg-clr: rgba(228, 228, 228);
+
+  --clr-gray: rgba(120, 120, 120);
+
+  --transition-1: 0.2s;
+
+  --gap-xs: 0.5rem;
+  --gap-sm: 1rem;
+  --gap-md: 2rem;
+
+  --font-xs: 0.75rem;
+  --font-sm: 1rem;
+  --font-md: 1.5rem;
+  --font-lg: 2rem;
+  --font-xl: 3rem;
 }
 
 @media (prefers-color-scheme: light) {
@@ -66,6 +84,7 @@ body {
   color: var(--font-color);
   min-height: 100svh;
   min-height: 100vh;
+  background-color: var(--bg-clr);
 }
 
 table {
@@ -96,4 +115,34 @@ button {
 
 code {
   font-family: monospace;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  border: solid 1px black;
+  background-color: transparent;
+  height: 3rem;
+  padding-inline: 1rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  transition: var(--transition-1);
+}
+
+.btn:hover {
+  background-color: black;
+  color: var(--font-color-inverse);
+  transition: var(--transition-1);
+}
+
+.btn--inverse {
+  background-color: black;
+  color: var(--font-color-inverse);
+  transition: var(--transition-1);
+}
+.btn--inverse:hover {
+  background-color: transparent;
+  color: var(--font-color);
+  transition: var(--transition-1);
 }

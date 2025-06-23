@@ -1,22 +1,75 @@
 {% local nelt = require "..vendor.nelt.nelt" %}
 {% local http = require "..vendor.http-nelua.http"%}
-
 {% local layout = require ".layout-nelt" %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
 <div>
   <style>
     me {
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem;
-      & img {
-        width: 3rem;
-      }
+      height: 100svh;
+      padding: 2rem;
     }
   </style>
-  <img src="/static/images/naira-coin-small.svg" class="h-12" alt="" />
-  <a href="{{ self:url_for('login') }}" class="btn btn--inverse">Log in</a>
+  <div>
+    <style>
+      me {
+        display: flex;
+        justify-content: space-between;
+
+        & img {
+          width: 3rem;
+        }
+      }
+    </style>
+    <img src="/static/images/naira-coin-small.svg" class="h-12" alt="" />
+    <a href="{{ self:url_for('login') }}" class="btn">Log in</a>
+  </div>
+
+  <div>
+    <style>
+      me {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+    <div>
+      <style>
+        me {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: var(--gap-sm);
+
+          & h1 {
+            font-size: var(--font-xl);
+          }
+
+          & p {
+            font-size: var(--font-sm);
+            color: var(--clr-gray);
+          }
+        }
+      </style>
+
+      <h1>Level Up Your Finances: Play, Plan, Prosper!</h1>
+      <p>
+        Welcome to your financial power-up! Track expenses, set goals, and
+        unlock achievements as you conquer your financial journey. Join today
+        and game your way to financial success!
+      </p>
+      <a href="{{ self:url_for('signup') }}" class="btn btn--inverse">
+        <style>
+          me {
+            display: flex;
+            gap: var(--gap-xs);
+          }
+        </style>
+        Get started
+        <i class="nf nf-cod-arrow_right"></i>
+      </a>
+    </div>
+    <img src="/static/images/naira-coin-large.png" alt="" />
+  </div>
 </div>
 {% end %}
 
