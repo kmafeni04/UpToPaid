@@ -46,29 +46,16 @@
       unlock achievements as you conquer your financial journey. Join today
       and game your way to financial success!
     </p>
-    {% if self.session:get_val("current_user") == "" then %}
-      <a href="{{ self:url_for("signup") }}" class="btn btn--inverse">
-        <style>
-          me {
-            display: flex;
-            gap: var(--gap-xs);
-          }
-        </style>
-        Get started
-        <i class="nf nf-cod-arrow_right"></i>
-      </a>
-    {% else %}
-      <a href="{{ self:url_for("dashboard") }}" class="btn btn--inverse">
-        <style>
-          me {
-            display: flex;
-            gap: var(--gap-xs);
-          }
-        </style>
-        Enter dashboard
-        <i class="nf nf-cod-arrow_right"></i>
-      </a>
-    {% end %}
+    <a href="{{ self:url_for("signup") }}" class="btn btn--inverse">
+      <style>
+        me {
+          display: flex;
+          gap: var(--gap-xs);
+        }
+      </style>
+      Get started
+      <i class="nf nf-cod-arrow_right"></i>
+    </a>
   </div>
   <img src="/static/images/naira-coin-large.png" alt="" />
 </div>
