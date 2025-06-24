@@ -71,6 +71,14 @@
         transition: var(--transition-sm);
       }
 
+      @media(max-width: 768px) {
+        me.open {
+          position: fixed;
+          width: 100svw;
+          height: 100svh;
+        }
+      }
+
       me.closed {
         width: 5rem;
         transition: var(--transition-sm);
