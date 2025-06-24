@@ -8,12 +8,12 @@
 
   --clr-gray: rgba(120, 120, 120);
 
-  --transition-xs: 0.2s;
+  --transition-sm: 0.2s;
 
-  --radius-xs: 0.5rem;
+  --radius-sm: 0.5rem;
 
   --padding-sm: 1rem;
-  --padding-md: 2rem;
+  --padding-md: 1.5rem;
   --padding-lg: 3rem;
   --padding-xl: 4rem;
 
@@ -144,27 +144,28 @@ p {
   background-color: transparent;
   height: 2.5rem;
   padding-inline: var(--padding-sm);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
   font-weight: bold;
   text-decoration: none;
-  transition: var(--transition-xs);
+  transition: var(--transition-sm);
 }
 
 .btn:hover {
   background-color: black;
   color: var(--font-color-inverse);
-  transition: var(--transition-xs);
+  transition: var(--transition-sm);
 }
 
 .btn--inverse {
   background-color: black;
   color: var(--font-color-inverse);
-  transition: var(--transition-xs);
+  transition: var(--transition-sm);
 }
 .btn--inverse:hover {
   background-color: transparent;
   color: var(--font-color);
-  transition: var(--transition-xs);
+  transition: var(--transition-sm);
 }
 
 .input {
@@ -172,5 +173,5 @@ p {
   background-color: transparent;
   height: 2.5rem;
   padding-inline: var(--padding-sm);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
 }

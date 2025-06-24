@@ -1,0 +1,109 @@
+local nelt = require "...vendor.nelt.nelt"
+local http = require "...vendor.http-nelua.http"
+local layout = require "..layout-nelt"
+local function home(tp: *nelt.Template, self: *http.Server, content: function(tp: *nelt.Template, self: *http.Server))
+tp:write([[<div>
+  <style>
+    me {
+      display: flex;
+      width: 100svw;
+    }
+  </style>
+  <div>
+    <style>
+      me {
+        padding-block: var(--padding-md);
+        padding-inline: var(--padding-sm);
+        height: calc(100svh - var(--nav-height));
+        background-color: black;
+        width: 15rem;
+        display: flex;
+        flex-direction: column;
+        color: white;
+
+        & nav {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+
+          & button {
+            background-color: transparent;
+            border: none;
+          }
+
+          & a,
+          & button {
+            display: flex;
+            align-items: center;
+            gap: var(--gap-xs);
+            text-decoration: none;
+            font-size: var(--font-sm);
+            padding: var(--padding-sm);
+            border-radius: var(--radius-sm);
+            transition: var(--transition-sm);
+
+            &:nth-child(5) {
+              margin-top: auto;
+            }
+
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.1);
+              transition: var(--transition-sm);
+            }
+
+            &.active {
+              background-color: rgba(255, 255, 255, 0.2);
+
+            }
+          }
+        }
+      }
+    </style>
+    <nav>
+      <a href="]])
+tp:escape(self:url_for("dashboard"))
+tp:write([["
+         class="]])
+tp:escape(self.req.current_path == self:url_for("dashboard") and 'active' or '')
+tp:write([[">
+        <i class="nf nf-md-collage"></i>
+        Dashboard
+      </a>
+      <a href="]])
+tp:escape(self:url_for("goals"))
+tp:write([["
+         class="]])
+tp:escape(self.req.current_path == self:url_for("goals") and 'active' or '')
+tp:write([[">
+        <i class="nf nf-oct-goal"></i>
+        Goals
+      </a>
+      <a href="">
+        <i class="nf nf-fa-tasks"></i>
+        Tasks
+      </a>
+      <a href="">
+        <i class="nf nf-fa-trophy"></i>
+        Achievements
+      </a>
+      <a href="">
+        <i class="nf nf-fa-cog"></i>
+        Settings
+      </a>
+      <form action="]])
+tp:escape(self:url_for("logout"))
+tp:write([[" method="POST">
+        <button>
+          <i class="nf nf-md-exit_run"></i>
+          Log out
+        </button>
+      </form>
+
+    </nav>
+  </div>
+  <div>]])
+content(tp, self)
+tp:write([[</div>
+</div>]])
+end
+return home

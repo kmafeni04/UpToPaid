@@ -38,20 +38,35 @@ tp:write([[<div>
       Welcome to your financial power-up! Track expenses, set goals, and
       unlock achievements as you conquer your financial journey. Join today
       and game your way to financial success!
-    </p>
-    <a href="]])
-tp:escape(self:url_for('signup'))
+    </p>]])
+if self.session:get_val("current_user") == "" then
+tp:write([[<a href="]])
+tp:escape(self:url_for("signup"))
 tp:write([[" class="btn btn--inverse">
-      <style>
-        me {
-          display: flex;
-          gap: var(--gap-xs);
-        }
-      </style>
-      Get started
-      <i class="nf nf-cod-arrow_right"></i>
-    </a>
-  </div>
+        <style>
+          me {
+            display: flex;
+            gap: var(--gap-xs);
+          }
+        </style>
+        Get started
+        <i class="nf nf-cod-arrow_right"></i>
+      </a>]])
+else
+tp:write([[<a href="]])
+tp:escape(self:url_for("dashboard"))
+tp:write([[" class="btn btn--inverse">
+        <style>
+          me {
+            display: flex;
+            gap: var(--gap-xs);
+          }
+        </style>
+        Enter dashboard
+        <i class="nf nf-cod-arrow_right"></i>
+      </a>]])
+end
+tp:write([[</div>
   <img src="/static/images/naira-coin-large.png" alt="" />
 </div>]])
 end

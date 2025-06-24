@@ -19,7 +19,7 @@ end
       gap: var(--gap-sm);
       padding: var(--padding-md);
       background-color: white;
-      border-radius: var(--radius-xs);
+      border-radius: var(--radius-sm);
 
       &>div {
         display: flex;

@@ -68,13 +68,17 @@ tp:write([[</title>
 <body>
   <div>
     <style>
+      :root {
+        --nav-height: 4rem
+      }
+
       me {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: black;
         position: fixed;
-        height: 5rem;
+        height: var(--nav-height);
         padding-block: var(--padding-sm);
         padding-inline: var(--padding-md);
         width: 100svw;
@@ -98,23 +102,32 @@ tp:write([["><img src="/static/images/naira-coin-small.svg" class="h-12" alt="" 
           }
 
           & .btn--inverse:hover {
-            color: var(--font-color);
             background-color: white;
           }
         }
-      </style>
-      <a href="]])
+      </style>]])
+if self.session:get_val("current_user") == "" then
+tp:write([[<a href="]])
 tp:escape(self:url_for('login'))
 tp:write([[" class="btn btn--inverse">Log in</a>
       <a href="]])
 tp:escape(self:url_for('signup'))
-tp:write([[" class="btn btn--inverse">Sign Up</a>
-    </div>
+tp:write([[" class="btn btn--inverse">Sign Up</a>]])
+else
+tp:write([[<form action="]])
+tp:escape(self:url_for('logout'))
+tp:write([[" method="POST">
+        <button class="btn btn--inverse">
+          Log out
+        </button>
+      </form>]])
+end
+tp:write([[</div>
   </div>
   <main>
     <style>
       me {
-        padding-top: 5rem;
+        padding-top: var(--nav-height);
         display: flex;
         align-items: center;
         justify-content: center;

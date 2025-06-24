@@ -1,0 +1,148 @@
+local http = require "..vendor.http-nelua.http"
+local norm = require "..vendor.norm.norm"
+local nelt = require "..vendor.nelt.nelt"
+
+local bcrypt = require "..utils.bcrypt"
+
+local auth = @record{}
+
+function auth.login_get(self: *http.Server)
+  if self.session:get_val("current_user") ~= "" then
+    return self:redirect(self:url_for("dashboard"))
+  end
+  local login = require "..templates.login-nelt"
+  local tp: nelt.Template
+  login(&tp, self)
+  return self:html(http.Status.OK, tp:tostring())
+end
+
+function auth.login_post(self: *http.Server, Users: norm.Model)
+  local errors: sequence(string)
+  local username = self.req.params["username"]
+  local password = self.req.params["password"]
+
+  if username == "" then
+    errors:push("Username is required")
+  end
+  if #username < 5 then
+    errors:push("Username must be 5 characters or more")
+  end
+  if password == "" then
+    errors:push("Password is required")
+  end
+  if #password < 9 then
+    errors:push("Password must be 9 characters or more")
+  end
+  local user, err = Users:find(inline_map!(string, string, { username = username }))
+  if err ~= "" then
+    return self:error(err)
+  end
+  if not next(user.row) then
+    errors:push("Username does not exist")
+  end
+  local stored_password_hash, err = user:get_col("password")
+  if err ~= "" then
+    return self:error(err)
+  end
+  local ok, err = bcrypt.verify(password, stored_password_hash)
+  if err ~= "" then
+    return self:error(err)
+  end
+  if not ok then
+    errors:push("Incorrect password")
+  end
+
+  if #errors ~= 0 then
+    self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
+    local login = require "..templates.login-nelt"
+    local tp: nelt.Template
+    login(&tp, self)
+    return self:html(http.Status.OK, tp:tostring())
+  end
+  self.session:set_val("current_user", username)
+  return self:redirect(self:url_for("dashboard"))
+end
+
+function auth.signup_get(self: *http.Server)
+  if self.session:get_val("current_user") ~= "" then
+    return self:redirect(self:url_for("dashboard"))
+  end
+  local signup = require "..templates.signup-nelt"
+  local tp: nelt.Template
+  signup(&tp, self)
+  return self:html(http.Status.OK, tp:tostring())
+end
+
+function auth.signup_post(self: *http.Server, Users: norm.Model): http.Response
+  local errors: sequence(string)
+  local username = self.req.params["username"]
+  local email = self.req.params["email"]
+  local password = self.req.params["password"]
+  local confirm_password = self.req.params["confirm-password"]
+
+  if username == "" then
+    errors:push("Username is required")
+  end
+  if #username < 5 then
+    errors:push("Username must be 5 characters or more")
+  end
+  if username ~= "" then
+    local user, err = Users:find(inline_map!(string, string, {
+      username = username
+    }))
+    if err ~= "" then
+      return self:error(err)
+    end
+    if next(user.row) then
+      errors:push("Username already exists")
+    end
+  end
+  if email == "" then
+    errors:push("Email is required")
+  end
+  if not email:match("[%w_]+@[%w_]+%.[%w][%w]+") then
+    errors:push("Email must be a valid email")
+  end
+  if email ~= "" then
+    local user, err = Users:find(inline_map!(string, string, {
+      email = email
+    }))
+    if err ~= "" then
+      return self:error(err)
+    end
+    if next(user.row) then
+      errors:push("Email already exists")
+    end
+  end
+  if password == "" then
+    errors:push("Password is required")
+  end
+  if #password < 9 then
+    errors:push("Password must be 9 characters or more")
+  end
+  if confirm_password == "" then
+    errors:push("Confirm password is required")
+  end
+  if password ~= confirm_password then
+    errors:push("Password and confirm password do not match")
+  end
+  if #errors ~= 0 then
+    self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
+    local signup = require "..templates.signup-nelt"
+    local tp: nelt.Template
+    signup(&tp, self)
+    return self:html(http.Status.OK, tp:tostring())
+  end
+  local user, err = Users:create(inline_map!(string, string,{
+    username = username,
+    email = email,
+    password = bcrypt.encrypt(password),
+  }))
+  if err ~= "" then
+    return self:error(err)
+  end
+  self.session:set_val("current_user", username)
+  return self:redirect(self:url_for("dashboard"))
+end
+
+return auth

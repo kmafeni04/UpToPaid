@@ -68,13 +68,17 @@ self: *http.Server)
 <body>
   <div>
     <style>
+      :root {
+        --nav-height: 4rem
+      }
+
       me {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: black;
         position: fixed;
-        height: 5rem;
+        height: var(--nav-height);
         padding-block: var(--padding-sm);
         padding-inline: var(--padding-md);
         width: 100svw;
@@ -96,19 +100,26 @@ self: *http.Server)
           }
 
           & .btn--inverse:hover {
-            color: var(--font-color);
             background-color: white;
           }
         }
       </style>
+      {% if self.session:get_val("current_user") == "" then %}
       <a href="{{ self:url_for('login') }}" class="btn btn--inverse">Log in</a>
       <a href="{{ self:url_for('signup') }}" class="btn btn--inverse">Sign Up</a>
+      {% else %}
+      <form action="{{ self:url_for('logout') }}" method="POST">
+        <button class="btn btn--inverse">
+          Log out
+        </button>
+      </form>
+      {% end %}
     </div>
   </div>
   <main>
     <style>
       me {
-        padding-top: 5rem;
+        padding-top: var(--nav-height);
         display: flex;
         align-items: center;
         justify-content: center;
