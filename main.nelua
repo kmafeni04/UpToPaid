@@ -38,7 +38,7 @@ local err = norm.migrate(db, {
     "1750722036",
     function(db: norm.Db): string
       local _, err = db:insert("users", inline_map!(string, string, {
-        username = "test",
+        username = "testuser",
         email = "test@test.com",
         password = bcrypt.encrypt("testpassword")
       }))
@@ -69,7 +69,60 @@ app:get("index", "/", function(self: *http.Server): http.Response
 end)
 
 app:get("login", "/login", function(self: *http.Server): http.Response
-  return self:html(http.Status.OK, "login")
+  for k in pairs(self.req.params) do
+    self.req.params[k] = ""
+  end
+  local login = require ".templates.login-nelt"
+  local tp: nelt.Template
+  login(&tp, self)
+  return self:html(http.Status.OK, tp:tostring())
+end)
+
+app:post("login", "/login", function(self: *http.Server): http.Response
+  local errors: sequence(string)
+  local username = self.req.params["username"]
+  local password = self.req.params["password"]
+
+  if username == "" then
+    errors:push("Username is required")
+  end
+  if #username < 5 then
+    errors:push("Username must be 5 characters or more")
+  end
+  if password == "" then
+    errors:push("Password is required")
+  end
+  if #password < 9 then
+    errors:push("Password must be 9 characters or more")
+  end
+  local user, err = Users:find(inline_map!(string, string, { username = username }))
+  if err ~= "" then
+    return self:error(err)
+  end
+  if not next(user.row) then
+    errors:push("Username does not exist")
+  end
+  local stored_password_hash, err = user:get_col("password")
+  if err ~= "" then
+    return self:error(err)
+  end
+  local ok, err = bcrypt.verify(password, stored_password_hash)
+  if err ~= "" then
+    return self:error(err)
+  end
+  if not ok then
+    errors:push("Incorrect password")
+  end
+
+  if #errors ~= 0 then
+    self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
+    local login = require ".templates.login-nelt"
+    local tp: nelt.Template
+    login(&tp, self)
+    return self:html(http.Status.OK, tp:tostring())
+  end
+  self.session:set_val("current_user", username)
+  return self:redirect(self:url_for("dashboard"))
 end)
 
 app:get("signup", "/signup", function(self: *http.Server): http.Response
@@ -135,24 +188,23 @@ app:post("signup", "/signup", function(self: *http.Server): http.Response
   if password ~= confirm_password then
     errors:push("Password and confirm password do not match")
   end
-  if #errors == 0 then
-    local user, err = Users:create(inline_map!(string, string,{
-      username = username,
-      email = email,
-      password = bcrypt.encrypt(password),
-    }))
-    if err ~= "" then
-      return self:error(err)
-    end
-    self.session:set_val("current_user", username)
-    return self:redirect(self:url_for("dashboard"))
+  if #errors ~= 0 then
+    self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
+    local signup = require ".templates.signup-nelt"
+    local tp: nelt.Template
+    signup(&tp, self)
+    return self:html(http.Status.OK, tp:tostring())
   end
-
-  self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
-  local signup = require ".templates.signup-nelt"
-  local tp: nelt.Template
-  signup(&tp, self)
-  return self:html(http.Status.OK, tp:tostring())
+  local user, err = Users:create(inline_map!(string, string,{
+    username = username,
+    email = email,
+    password = bcrypt.encrypt(password),
+  }))
+  if err ~= "" then
+    return self:error(err)
+  end
+  self.session:set_val("current_user", username)
+  return self:redirect(self:url_for("dashboard"))
 end)
 
 app:get("dashboard", "/dashboard", function(self: *http.Server): http.Response
