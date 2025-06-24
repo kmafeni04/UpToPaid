@@ -7,19 +7,24 @@ tp:write([[<div>
     me {
       display: flex;
       width: 100svw;
+      height: 100svh;
     }
   </style>
-  <div>
+  <div data-signals-open="true"
+       data-persist__session="open"
+       data-class="{open: $open, closed: !$open}">
     <style>
       me {
         padding-block: var(--padding-md);
         padding-inline: var(--padding-sm);
         height: calc(100svh - var(--nav-height));
         background-color: black;
-        width: 15rem;
         display: flex;
         flex-direction: column;
+        gap: var(--gap-sm);
         color: white;
+        transition: var(--transition-sm);
+
 
         & nav {
           display: flex;
@@ -41,6 +46,7 @@ tp:write([[<div>
             padding: var(--padding-sm);
             border-radius: var(--radius-sm);
             transition: var(--transition-sm);
+            width: 100%;
 
             &:nth-child(5) {
               margin-top: auto;
@@ -58,7 +64,36 @@ tp:write([[<div>
           }
         }
       }
+
+      me.open {
+        width: 15rem;
+        transition: var(--transition-sm);
+      }
+
+      me.closed {
+        width: 5rem;
+        transition: var(--transition-sm);
+      }
     </style>
+    <div>
+      <style>
+        me {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          & img {
+            max-width: 2.5rem;
+          }
+        }
+      </style>
+      <img src="/static/images/naira-coin-small.svg" alt="" data-show="$open" />
+      <button class="btn btn--white" data-on-click="$open = !$open">
+        <i class="nf nf-md-menu" data-show="$open == false"></i>
+        <i class="nf nf-md-close" data-show="$open == true"></i>
+      </button>
+
+    </div>
     <nav>
       <a href="]])
 tp:escape(self:url_for("dashboard"))
@@ -67,7 +102,7 @@ tp:write([["
 tp:escape(self.req.current_path == self:url_for("dashboard") and 'active' or '')
 tp:write([[">
         <i class="nf nf-md-collage"></i>
-        Dashboard
+        <span data-show="$open">Dashboard</span>
       </a>
       <a href="]])
 tp:escape(self:url_for("goals"))
@@ -76,26 +111,36 @@ tp:write([["
 tp:escape(self.req.current_path == self:url_for("goals") and 'active' or '')
 tp:write([[">
         <i class="nf nf-oct-goal"></i>
-        Goals
+        <span data-show="$open">Goals</span>
       </a>
       <a href="">
         <i class="nf nf-fa-tasks"></i>
-        Tasks
+        <span data-show="$open">Tasks</span>
       </a>
       <a href="">
         <i class="nf nf-fa-trophy"></i>
-        Achievements
+        <span data-show="$open">Achievements</span>
       </a>
-      <a href="">
-        <i class="nf nf-fa-cog"></i>
-        Settings
+      <a href="]])
+tp:escape(self:url_for("profile"))
+tp:write([["
+         class="]])
+tp:escape(self.req.current_path == self:url_for("profile") and 'active' or '')
+tp:write([[">
+        <i class="nf nf-fa-user"></i>
+        <span data-show="$open">Profile</span>
       </a>
       <form action="]])
 tp:escape(self:url_for("logout"))
 tp:write([[" method="POST">
+        <style>
+          me {
+            width: 100%;
+          }
+        </style>
         <button>
           <i class="nf nf-md-exit_run"></i>
-          Log out
+          <span data-show="$open">Log out</span>
         </button>
       </form>
 

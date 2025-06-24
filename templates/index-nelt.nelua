@@ -1,13 +1,17 @@
 local nelt = require "..vendor.nelt.nelt"
 local http = require "..vendor.http-nelua.http"
+local navbar = require ".components.navbar-nelt"
 local layout = require ".layout-nelt"
 local function content(tp: *nelt.Template, self: *http.Server)
+navbar(tp, self)
 tp:write([[<div>
   <style>
     me {
       display: flex;
       align-items: center;
+      height: 100svh;
       padding: var(--padding-md);
+      padding-top: var(--nav-height);
 
       &>img {
         max-width: 35rem

@@ -168,6 +168,16 @@ p {
   transition: var(--transition-sm);
 }
 
+.btn--white {
+  border: solid 1px var(--font-color-inverse);
+  color: var(--font-color-inverse);
+}
+
+& .btn--white:hover {
+  background-color: var(--font-color-inverse);
+  color: var(--font-color);
+}
+
 .input {
   border: solid 1px black;
   background-color: transparent;

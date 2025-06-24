@@ -1,79 +1,108 @@
 local nelt = require "..vendor.nelt.nelt"
 local http = require "..vendor.http-nelua.http"
+local navbar = require ".components.navbar-nelt"
 local layout = require ".layout-nelt"
 local function content(tp: *nelt.Template, self: *http.Server)
+navbar(tp, self)
 local errors: sequence(string)
 if self.req.params["errors"] ~= "" then
 for error in self.req.params["errors"]:gmatch("([^\n]+\n)") do
 errors:push(error)
 end
 end
-tp:write([[<form action="]])
-tp:escape(self:url_for('signup'))
-tp:write([[" method="POST">
+tp:write([[<div>
   <style>
     me {
       display: flex;
-      flex-direction: column;
-      gap: var(--gap-sm);
-      padding: var(--padding-md);
-      background-color: white;
-      border-radius: var(--radius-sm);
+      align-items: center;
+      justify-content: center;
+      height: 100svh;
 
-      &>div {
+      & form {
         display: flex;
         flex-direction: column;
         gap: var(--gap-sm);
+        padding: var(--padding-md);
+        background-color: white;
+        border-radius: var(--radius-sm);
 
-        & label {
-          font-weight: 700;
+        &>div {
+          display: flex;
+          flex-direction: column;
+          gap: var(--gap-sm);
+
+          & label {
+            font-weight: 700;
+          }
         }
       }
     }
-    }
   </style>
-  <h1>Create a new account</h1>
-  <div>
-    <label for="username">Username</label>
-    <input required class="input" type="text" name="username" id="username" value="]])
+  <form action="]])
+tp:escape(self:url_for("signup"))
+tp:write([[" method="POST">
+    <h1>Create a new account</h1>
+    <div>
+      <label for="username">Username</label>
+      <input required
+             class="input"
+             type="text"
+             name="username"
+             id="username"
+             value="]])
 tp:escape(self.req.params['username'])
 tp:write([[">
-  </div>
-  <div>
-    <label for="email">Email</label>
-    <input required class="input" type="email" name="email" id="email" value="]])
+    </div>
+    <div>
+      <label for="email">Email</label>
+      <input required
+             class="input"
+             type="email"
+             name="email"
+             id="email"
+             value="]])
 tp:escape(self.req.params['email'])
 tp:write([[">
-  </div>
-  <div>
-    <label for="password">Password</label>
-    <input required class="input" type="password" name="password" id="password"
-      value="]])
+    </div>
+    <div>
+      <label for="password">Password</label>
+      <input required
+             class="input"
+             type="password"
+             name="password"
+             id="password"
+             value="]])
 tp:escape(self.req.params['password'])
 tp:write([[">
-  </div>
-  <div>
-    <label for="confirm-password">Confirm password</label>
-    <input required class="input" type="password" name="confirm-password" id="confirm-password"
-      value="]])
+    </div>
+    <div>
+      <label for="confirm-password">Confirm password</label>
+      <input required
+             class="input"
+             type="password"
+             name="confirm-password"
+             id="confirm-password"
+             value="]])
 tp:escape(self.req.params['confirm-password'])
 tp:write([[">
-  </div>
-  <p>Already have an account? <a href="]])
-tp:escape(self:url_for('login'))
-tp:write([[">Log in</a></p>]])
+    </div>
+    <p>
+      Already have an account? <a href="]])
+tp:escape(self:url_for("login"))
+tp:write([[">Log in</a>
+    </p>]])
 if #errors > 0 then
 tp:write([[<ul>
-    <style>
-      me {
-        display: flex;
-        flex-direction: column;
-        gap: var(--gap-xs);
-        color: red;
-        list-style-position: inside;
+        <style>
+          me {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-xs);
+            color: red;
+            list-style-position: inside;
 
-      }
-    </style>]])
+          }
+        </style>]])
 for _, error in ipairs(errors) do
 tp:write([[<li>]])
 tp:escape(error)
@@ -82,7 +111,8 @@ end
 tp:write([[</ul>]])
 end
 tp:write([[<button class="btn btn--inverse">Sign Up</button>
-</form>]])
+  </form>
+</div>]])
 end
 local function signup(tp: *nelt.Template, self: *http.Server)
 layout(tp, "", content, self)

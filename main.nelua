@@ -65,6 +65,9 @@ local Users, err = norm.Model.new(&db, "users", "Users")
 assert(err == "", err)
 
 app:get("index", "/", function(self: *http.Server): http.Response
+  if self.session:get_val("current_user") ~= "" then
+    return self:redirect(self:url_for("dashboard"))
+  end
   local index = require ".templates.index-nelt"
   local tp: nelt.Template
   index(&tp, self)
@@ -116,6 +119,16 @@ app:get("goals", "/home/goals", function(self: *http.Server): http.Response
   local goals = require ".templates.goals-nelt"
   local tp: nelt.Template
   goals(&tp, self)
+  return self:html(http.Status.OK, tp:tostring())
+end)
+
+app:get("profile", "/home/profile", function(self: *http.Server): http.Response
+  if self.session:get_val("current_user") == "" then
+    return self:redirect(self:url_for("login"))
+  end
+  local profile = require ".templates.profile-nelt"
+  local tp: nelt.Template
+  profile(&tp, self)
   return self:html(http.Status.OK, tp:tostring())
 end)
 
