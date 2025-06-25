@@ -1,87 +1,70 @@
 local nelt = require "..vendor.nelt.nelt"
 local http = require "..vendor.http-nelua.http"
-local navbar = require ".components.navbar-nelt"
+local auth = require ".components.auth-nelt"
 local layout = require ".layout-nelt"
-local function content(tp: *nelt.Template, self: *http.Server)
-navbar(tp, self)
+local function login_content(tp: *nelt.Template, self: *http.Server)
 local errors: sequence(string)
 if self.req.params["errors"] ~= "" then
 for error in self.req.params["errors"]:gmatch("([^\n]+\n)") do
 errors:push(error)
 end
 end
-tp:write([====[<div>
-    <style>
-      me {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100svh;
-        padding-top: var(--nav-height);
-
-        & form {
-          display: flex;
-          flex-direction: column;
-          gap: var(--gap-sm);
-          padding: var(--padding-md);
-          background-color: white;
-          border-radius: var(--radius-sm);
-
-          &>div {
-            display: flex;
-            flex-direction: column;
-            gap: var(--gap-sm);
-
-            & label {
-              font-weight: 700;
-            }
-          }
-        }
-      }
-    </style>
-    <form action="]====])
+tp:write([====[<form action="]====])
 tp:escape(self:url_for("login"))
-tp:write([====[" method="POST">
-      <h1>Welcome back</h1>
-      <div>
-        <label for="username">Username</label>
-        <input required
-               class="input"
-               type="text"
-               name="username"
-               id="username"
-               value="]====])
+tp:write([====["
+        method="POST"
+        data-signals-shown="false">
+    <h1>Welcome back</h1>
+    <div class="input-div">
+      <label for="username">Username</label>
+      <input required
+             class="input"
+             type="text"
+             name="username"
+             id="username"
+             value="]====])
 tp:escape(self.req.params['username'])
 tp:write([====[">
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input required
-               class="input"
-               type="password"
-               name="password"
-               id="password"
-               value="]====])
+    </div>
+    <div class="input-div">
+      <label for="password">Password</label>
+      <input required
+             class="input"
+             data-attr-type="$shown && 'text' || 'password'"
+             type="password"
+             name="password"
+             id="password"
+             value="]====])
 tp:escape(self.req.params['password'])
 tp:write([====[">
-      </div>
-      <p>
-        Don't have an account? <a href="]====])
+    </div>
+    <div>
+      <style>
+        me {
+          display: flex;
+          gap: var(--gap-xs);
+        }
+      </style>
+      <input type="checkbox" data-on-click="$shown = !$shown">
+      <p>Show password</p>
+    </div>
+    <p>
+      Don't have an account? <a href="]====])
 tp:escape(self:url_for("signup"))
 tp:write([====[">Sign Up</a>
-      </p>]====])
+    </p>]====])
 if #errors > 0 then
 tp:write([====[<ul>
-          <style>
-            me {
-              display: flex;
-              flex-direction: column;
-              gap: var(--gap-xs);
-              color: red;
-              list-style-position: inside;
+        <style>
+          me {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-xs);
+            color: red;
+            list-style-position: inside;
 
-            }
-          </style>]====])
+          }
+        </style>]====])
 for _, error in ipairs(errors) do
 tp:write([====[<li>]====])
 tp:escape(error)
@@ -90,8 +73,10 @@ end
 tp:write([====[</ul>]====])
 end
 tp:write([====[<button class="btn">Log in</button>
-    </form>
-  </div>]====])
+  </form>]====])
+end
+local function content(tp: *nelt.Template, self: *http.Server)
+auth(tp, self, login_content)
 end
 local function login(tp: *nelt.Template, self: *http.Server)
 layout(tp, "", content, self)

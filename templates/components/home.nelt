@@ -1,5 +1,6 @@
 {% local nelt = require "...vendor.nelt.nelt" %}
 {% local http = require "...vendor.http-nelua.http" %}
+
 {% local layout = require "..layout-nelt" %}
 
 {% local function home(tp: *nelt.Template, self: *http.Server, head: string, sub_head: string, content: function(tp: *nelt.Template, self: *http.Server)) %}

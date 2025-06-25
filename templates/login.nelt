@@ -1,11 +1,10 @@
 {% local nelt = require "..vendor.nelt.nelt" %}
 {% local http = require "..vendor.http-nelua.http" %}
 
-{% local navbar = require ".components.navbar-nelt" %}
+{% local auth = require ".components.auth-nelt" %}
 {% local layout = require ".layout-nelt" %}
 
-{% local function content(tp: *nelt.Template, self: *http.Server) %}
-  {% navbar(tp, self) %}
+{% local function login_content(tp: *nelt.Template, self: *http.Server) %}
 
   {% local errors: sequence(string) %}
   {% if self.req.params["errors"] ~= "" then %}
@@ -14,78 +13,65 @@
     {% end %}
   {% end %}
 
-  <div>
-    <style>
-      me {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100svh;
-        padding-top: var(--nav-height);
-
-        & form {
+  <form action="{{ self:url_for("login") }}"
+        method="POST"
+        data-signals-shown="false">
+    <h1>Welcome back</h1>
+    <div class="input-div">
+      <label for="username">Username</label>
+      <input required
+             class="input"
+             type="text"
+             name="username"
+             id="username"
+             value="{{ self.req.params['username'] }}">
+    </div>
+    <div class="input-div">
+      <label for="password">Password</label>
+      <input required
+             class="input"
+             data-attr-type="$shown && 'text' || 'password'"
+             type="password"
+             name="password"
+             id="password"
+             value="{{ self.req.params['password'] }}">
+    </div>
+    <div>
+      <style>
+        me {
           display: flex;
-          flex-direction: column;
-          gap: var(--gap-sm);
-          padding: var(--padding-md);
-          background-color: white;
-          border-radius: var(--radius-sm);
-
-          &>div {
+          gap: var(--gap-xs);
+        }
+      </style>
+      <input type="checkbox" data-on-click="$shown = !$shown">
+      <p>Show password</p>
+    </div>
+    <p>
+      Don't have an account? <a href="{{ self:url_for("signup") }}">Sign Up</a>
+    </p>
+    {% if #errors > 0 then %}
+      <ul>
+        <style>
+          me {
             display: flex;
             flex-direction: column;
-            gap: var(--gap-sm);
+            gap: var(--gap-xs);
+            color: red;
+            list-style-position: inside;
 
-            & label {
-              font-weight: 700;
-            }
           }
-        }
-      }
-    </style>
-    <form action="{{ self:url_for("login") }}" method="POST">
-      <h1>Welcome back</h1>
-      <div>
-        <label for="username">Username</label>
-        <input required
-               class="input"
-               type="text"
-               name="username"
-               id="username"
-               value="{{ self.req.params['username'] }}">
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input required
-               class="input"
-               type="password"
-               name="password"
-               id="password"
-               value="{{ self.req.params['password'] }}">
-      </div>
-      <p>
-        Don't have an account? <a href="{{ self:url_for("signup") }}">Sign Up</a>
-      </p>
-      {% if #errors > 0 then %}
-        <ul>
-          <style>
-            me {
-              display: flex;
-              flex-direction: column;
-              gap: var(--gap-xs);
-              color: red;
-              list-style-position: inside;
+        </style>
+        {% for _, error in ipairs(errors) do %}
+          <li>{{ error }}</li>
+        {% end %}
+      </ul>
+    {% end %}
+    <button class="btn">Log in</button>
+  </form>
+{% end %}
 
-            }
-          </style>
-          {% for _, error in ipairs(errors) do %}
-            <li>{{ error }}</li>
-          {% end %}
-        </ul>
-      {% end %}
-      <button class="btn">Log in</button>
-    </form>
-  </div>
+{% local function content(tp: *nelt.Template, self: *http.Server) %}
+  {% auth(tp, self, login_content) %}
 {% end %}
 
 {% local function login(tp: *nelt.Template, self: *http.Server) %}
