@@ -4,15 +4,14 @@
 {% local home = require ".components.home-nelt" %}
 
 {% local function profile_content(tp: *nelt.Template, self: *http.Server) %}
-<h1>Profile</h1>
 {% end %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
-{% home(tp, self, profile_content) %}
+  {% home(tp, self, "Profile", "", profile_content) %}
 {% end %}
 
 {% local function profile(tp: *nelt.Template, self: *http.Server) %}
-{% layout(tp, "", content, self) %}
+  {% layout(tp, "", content, self) %}
 {% end %}
 
 {% return profile %}

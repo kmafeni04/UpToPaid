@@ -4,15 +4,14 @@
 {% local home = require ".components.home-nelt" %}
 
 {% local function goals_content(tp: *nelt.Template, self: *http.Server) %}
-<h1>Goals</h1>
 {% end %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
-{% home(tp, self, goals_content) %}
+  {% home(tp, self, "Goals", "", goals_content) %}
 {% end %}
 
 {% local function goals(tp: *nelt.Template, self: *http.Server) %}
-{% layout(tp, "", content, self) %}
+  {% layout(tp, "", content, self) %}
 {% end %}
 
 {% return goals %}

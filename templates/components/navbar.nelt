@@ -2,44 +2,44 @@
 {% local http = require "...vendor.http-nelua.http" %}
 
 {% local function navbar(tp: *nelt.Template, self: *http.Server) %}
-<div>
-  <style>
-    :root {
-      --nav-height: 4rem
-    }
-
-    me {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: black;
-      position: fixed;
-      top: 0;
-      height: var(--nav-height);
-      padding-block: var(--padding-sm);
-      padding-inline: var(--padding-md);
-      width: 100svw;
-      color: var(--font-color-inverse);
-
-      & img {
-        width: 3rem;
-      }
-    }
-  </style>
-  <a href="{{ self:url_for("index") }}">
-    <img src="/static/images/naira-coin-small.svg" alt="" />
-  </a>
   <div>
     <style>
+      :root {
+        --nav-height: 4rem
+      }
+
       me {
         display: flex;
-        gap: var(--gap-sm);
+        justify-content: space-between;
+        align-items: center;
+        background: black;
+        position: fixed;
+        top: 0;
+        height: var(--nav-height);
+        padding-block: var(--padding-sm);
+        padding-inline: var(--padding-md);
+        width: 100svw;
+        color: var(--font-color-inverse);
 
+        & img {
+          width: 3rem;
+        }
       }
     </style>
-    <a href="{{ self:url_for("login") }}" class="btn btn--white">Log in</a>
-    <a href="{{ self:url_for("signup") }}" class="btn btn--white">Sign Up</a>
+    <a href="{{ self:url_for("index") }}">
+      <img src="/static/images/naira-coin-small.svg" alt="" />
+    </a>
+    <div>
+      <style>
+        me {
+          display: flex;
+          gap: var(--gap-sm);
+
+        }
+      </style>
+      <a href="{{ self:url_for("login") }}" class="btn btn--inverse">Log in</a>
+      <a href="{{ self:url_for("signup") }}" class="btn btn--inverse">Sign Up</a>
+    </div>
   </div>
-</div>
 {% end %}
 {% return navbar %}

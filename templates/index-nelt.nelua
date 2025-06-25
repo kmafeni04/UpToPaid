@@ -5,65 +5,65 @@ local layout = require ".layout-nelt"
 local function content(tp: *nelt.Template, self: *http.Server)
 navbar(tp, self)
 tp:write([====[<div>
-  <style>
-    me {
-      display: flex;
-      align-items: center;
-      height: 100svh;
-      padding: var(--padding-md);
-      padding-top: var(--nav-height);
-
-      &>img {
-        max-width: 35rem
-      }
-    }
-
-    @media(max-width: 1200px) {
-      me>img {
-        display: none;
-      }
-    }
-  </style>
-  <div>
     <style>
       me {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--gap-sm);
+        align-items: center;
+        height: 100svh;
+        padding: var(--padding-md);
+        padding-top: var(--nav-height);
 
-        & h1 {
-          font-size: var(--font-xl);
+        &>img {
+          max-width: 35rem
         }
+      }
 
-        & p {
-          font-size: var(--font-sm);
-          color: var(--clr-gray);
+      @media(max-width: 1200px) {
+        me>img {
+          display: none;
         }
       }
     </style>
-
-    <h1>Level Up Your Finances: Play, Plan, Prosper!</h1>
-    <p>
-      Welcome to your financial power-up! Track expenses, set goals, and
-      unlock achievements as you conquer your financial journey. Join today
-      and game your way to financial success!
-    </p>
-    <a href="]====])
-tp:escape(self:url_for("signup"))
-tp:write([====[" class="btn btn--inverse">
+    <div>
       <style>
         me {
           display: flex;
-          gap: var(--gap-xs);
+          flex-direction: column;
+          align-items: flex-start;
+          gap: var(--gap-sm);
+
+          & h1 {
+            font-size: var(--font-xl);
+          }
+
+          & p {
+            font-size: var(--font-sm);
+            color: var(--clr-gray);
+          }
         }
       </style>
-      Get started
-      <i class="nf nf-cod-arrow_right"></i>
-    </a>
-  </div>
-  <img src="/static/images/naira-coin-large.png" alt="" />
-</div>]====])
+
+      <h1>Level Up Your Finances: Play, Plan, Prosper!</h1>
+      <p>
+        Welcome to your financial power-up! Track expenses, set goals, and
+        unlock achievements as you conquer your financial journey. Join today
+        and game your way to financial success!
+      </p>
+      <a href="]====])
+tp:escape(self:url_for("signup"))
+tp:write([====[" class="btn">
+        <style>
+          me {
+            display: flex;
+            gap: var(--gap-xs);
+          }
+        </style>
+        Get started
+        <i class="nf nf-cod-arrow_right"></i>
+      </a>
+    </div>
+    <img src="/static/images/naira-coin-large.png" alt="" />
+  </div>]====])
 end
 local function index(tp: *nelt.Template, self: *http.Server)
 layout(tp, "", content, self)

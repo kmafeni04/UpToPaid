@@ -4,16 +4,99 @@
 {% local home = require ".components.home-nelt" %}
 
 {% local function dashboard_content(tp: *nelt.Template, self: *http.Server) %}
-<h1>Dashboard</h1>
-<p>Welcome, {{ " " .. self.session:get_val("current_user") }}</p>
+  <div>
+    <style>
+      me {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--gap-md);
+
+        &>div {
+          background-color: white;
+          width: 100%;
+          height: 13rem;
+          border-radius: var(--radius-md);
+          box-shadow: var(--box-shadow);
+          padding: var(--padding-sm);
+
+          & .summary_amount {
+            font-weight: 700;
+            font-size: var(--font-lg);
+          }
+        }
+      }
+    </style>
+    <div>
+      <p>Income:</p>
+      <p class="summary_amount">₦ 0</p>
+    </div>
+    <div>
+      <p>Expenses:</p>
+      <p class="summary_amount">₦ 0</p>
+    </div>
+    <div>
+      <p>Balance:</p>
+      <p class="summary_amount">₦ 0</p>
+    </div>
+  </div>
+  <div>
+    <style>
+      me {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-sm);
+        background-color: white;
+        width: 100%;
+        min-height: 13rem;
+        padding: var(--padding-sm);
+        border-radius: var(--radius-md);
+        box-shadow: var(--box-shadow);
+      }
+    </style>
+    <div>
+      <style>
+        me {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          & p {
+            font-weight: 700;
+          }
+        }
+      </style>
+      <p>Transactions</p>
+      <button class="btn">New Transaction+</button>
+    </div>
+    <div>
+      <style>
+        me {
+          display: flex;
+          flex-direction: column;
+          gap: var(--gap-sm);
+          align-items: center;
+          justify-content: center;
+
+          & p {
+            font-weight: 700;
+            font-size: var(--font-md);
+            text-align: center;
+          }
+        }
+      </style>
+      <p>Create a new Transaction</p>
+      <button class="btn">New Transaction+</button>
+    </div>
+  </div>
 {% end %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
-{% home(tp, self, dashboard_content) %}
+  {% local sub_head =  "Welcome, " .. self.session:get_val("current_user") %}
+  {% home(tp, self, "Dashboard", sub_head, dashboard_content) %}
 {% end %}
 
 {% local function dashboard(tp: *nelt.Template, self: *http.Server) %}
-{% layout(tp, "", content, self) %}
+  {% layout(tp, "", content, self) %}
 {% end %}
 
 {% return dashboard %}

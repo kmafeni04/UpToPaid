@@ -5,91 +5,91 @@
 {% local layout = require ".layout-nelt" %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
-{% navbar(tp, self) %}
+  {% navbar(tp, self) %}
 
-{% local errors: sequence(string) %}
-{% if self.req.params["errors"] ~= "" then %}
-  {% for error in self.req.params["errors"]:gmatch("([^\n]+\n)") do %}
-    {% errors:push(error) %}
+  {% local errors: sequence(string) %}
+  {% if self.req.params["errors"] ~= "" then %}
+    {% for error in self.req.params["errors"]:gmatch("([^\n]+\n)") do %}
+      {% errors:push(error) %}
+    {% end %}
   {% end %}
-{% end %}
 
-<div>
-  <style>
-    me {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100svh;
-      padding-top: var(--nav-height);
-
-      & form {
+  <div>
+    <style>
+      me {
         display: flex;
-        flex-direction: column;
-        gap: var(--gap-sm);
-        padding: var(--padding-md);
-        background-color: white;
-        border-radius: var(--radius-sm);
+        align-items: center;
+        justify-content: center;
+        min-height: 100svh;
+        padding-top: var(--nav-height);
 
-        &>div {
+        & form {
           display: flex;
           flex-direction: column;
           gap: var(--gap-sm);
+          padding: var(--padding-md);
+          background-color: white;
+          border-radius: var(--radius-sm);
 
-          & label {
-            font-weight: 700;
+          &>div {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-sm);
+
+            & label {
+              font-weight: 700;
+            }
           }
         }
       }
-    }
-  </style>
-  <form action="{{ self:url_for("login") }}" method="POST">
-    <h1>Welcome back</h1>
-    <div>
-      <label for="username">Username</label>
-      <input required
-             class="input"
-             type="text"
-             name="username"
-             id="username"
-             value="{{ self.req.params['username'] }}">
-    </div>
-    <div>
-      <label for="password">Password</label>
-      <input required
-             class="input"
-             type="password"
-             name="password"
-             id="password"
-             value="{{ self.req.params['password'] }}">
-    </div>
-    <p>
-      Don't have an account? <a href="{{ self:url_for("signup") }}">Sign Up</a>
-    </p>
-    {% if #errors > 0 then %}
-      <ul>
-        <style>
-          me {
-            display: flex;
-            flex-direction: column;
-            gap: var(--gap-xs);
-            color: red;
-            list-style-position: inside;
+    </style>
+    <form action="{{ self:url_for("login") }}" method="POST">
+      <h1>Welcome back</h1>
+      <div>
+        <label for="username">Username</label>
+        <input required
+               class="input"
+               type="text"
+               name="username"
+               id="username"
+               value="{{ self.req.params['username'] }}">
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input required
+               class="input"
+               type="password"
+               name="password"
+               id="password"
+               value="{{ self.req.params['password'] }}">
+      </div>
+      <p>
+        Don't have an account? <a href="{{ self:url_for("signup") }}">Sign Up</a>
+      </p>
+      {% if #errors > 0 then %}
+        <ul>
+          <style>
+            me {
+              display: flex;
+              flex-direction: column;
+              gap: var(--gap-xs);
+              color: red;
+              list-style-position: inside;
 
-          }
-        </style>
-        {% for _, error in ipairs(errors) do %}
-          <li>{{ error }}</li>
-        {% end %}
-      </ul>
-    {% end %}
-    <button class="btn btn--inverse">Log in</button>
-  </form>
-</div>
+            }
+          </style>
+          {% for _, error in ipairs(errors) do %}
+            <li>{{ error }}</li>
+          {% end %}
+        </ul>
+      {% end %}
+      <button class="btn">Log in</button>
+    </form>
+  </div>
 {% end %}
 
 {% local function login(tp: *nelt.Template, self: *http.Server) %}
-{% layout(tp, "", content, self) %}
+  {% layout(tp, "", content, self) %}
 {% end %}
 
 {% return login %}

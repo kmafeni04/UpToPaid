@@ -1,167 +1,194 @@
 local nelt = require "...vendor.nelt.nelt"
 local http = require "...vendor.http-nelua.http"
 local layout = require "..layout-nelt"
-local function home(tp: *nelt.Template, self: *http.Server, content: function(tp: *nelt.Template, self: *http.Server))
+local function home(
+  tp: *nelt.Template, self: *http.Server, head: string, sub_head: string, content: function(tp: *nelt.Template, self: *http.Server))
 tp:write([====[<div>
-  <style>
-    me {
-      display: flex;
-      width: 100svw;
-      height: 100svh;
-    }
-  </style>
-  <div data-signals-open="false"
-       data-persist__session="open"
-       data-class="{open: $open, closed: !$open}">
     <style>
       me {
-        padding-block: var(--padding-md);
-        padding-inline: var(--padding-sm);
-        height: calc(100svh - var(--nav-height));
-        background-color: black;
         display: flex;
-        flex-direction: column;
-        gap: var(--gap-sm);
-        color: white;
-        transition: var(--transition-sm);
-
-
-        & nav {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-
-          & button {
-            background-color: transparent;
-            border: none;
-          }
-
-          & a,
-          & button {
-            display: flex;
-            align-items: center;
-            gap: var(--gap-xs);
-            text-decoration: none;
-            font-size: var(--font-sm);
-            padding: var(--padding-sm);
-            border-radius: var(--radius-sm);
-            transition: var(--transition-sm);
-            width: 100%;
-
-            &:nth-child(5) {
-              margin-top: auto;
-            }
-
-            &:hover {
-              background-color: rgba(255, 255, 255, 0.1);
-              transition: var(--transition-sm);
-            }
-
-            &.active {
-              background-color: rgba(255, 255, 255, 0.2);
-
-            }
-          }
-        }
-      }
-
-      me.open {
-        width: 15rem;
-        transition: var(--transition-sm);
-      }
-
-      @media(max-width: 768px) {
-        me.open {
-          position: fixed;
-          width: 100svw;
-          height: 100svh;
-        }
-      }
-
-      me.closed {
-        width: 5rem;
-        transition: var(--transition-sm);
+        width: 100svw;
+        height: 100svh;
       }
     </style>
+    <div data-signals-open="false"
+         data-class="{open: $open, closed: !$open}"
+         class="closed">
+      <style>
+        me {
+          padding-block: var(--padding-md);
+          padding-inline: var(--padding-sm);
+          background-color: black;
+          display: flex;
+          flex-direction: column;
+          gap: var(--gap-sm);
+          color: white;
+          transition: var(--transition-sm);
+
+
+          & nav {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+
+            & button {
+              background-color: transparent;
+              border: none;
+            }
+
+            & a,
+            & button {
+              display: flex;
+              align-items: center;
+              gap: var(--gap-xs);
+              text-decoration: none;
+              font-size: var(--font-sm);
+              padding: var(--padding-sm);
+              border-radius: var(--radius-sm);
+              transition: var(--transition-sm);
+              width: 100%;
+
+              &:nth-child(5) {
+                margin-top: auto;
+              }
+
+              &:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                transition: var(--transition-sm);
+              }
+
+              &.active {
+                background-color: rgba(255, 255, 255, 0.3);
+
+              }
+            }
+          }
+        }
+
+        me.open {
+          width: 15rem;
+        }
+
+        @media(max-width: 768px) {
+          me.open {
+            position: fixed;
+            width: 100svw;
+            height: 100svh;
+          }
+        }
+
+        me.closed {
+          width: 5rem;
+        }
+      </style>
+      <div data-class="{open: $open, closed: !$open}" class="closed">
+        <style>
+          me {
+            display: flex;
+            align-items: center;
+
+            & img {
+              max-width: 2.5rem;
+            }
+          }
+
+          me.open {
+            justify-content: space-between;
+          }
+
+          me.closed {
+            justify-content: center;
+          }
+        </style>
+        <img src="/static/images/naira-coin-small.svg"
+             alt=""
+             data-show="$open"
+             style="display: none" />
+        <button class="btn btn--inverse" data-on-click="$open = !$open">
+          <i class="nf nf-md-menu" data-show="$open == false"></i>
+          <i class="nf nf-md-close"
+             data-show="$open == true"
+             style="display: none"></i>
+        </button>
+
+      </div>
+      <nav>
+        <a href="]====])
+tp:escape(self:url_for("dashboard"))
+tp:write([====["
+           title="Dashboard"
+           class="]====])
+tp:escape(self.req.current_path == self:url_for("dashboard") and 'active' or '')
+tp:write([====[">
+          <i class="nf nf-md-collage"></i>
+          <span data-show="$open" style="display: none;">Dashboard</span>
+        </a>
+        <a href="]====])
+tp:escape(self:url_for("goals"))
+tp:write([====["
+           title="Goals"
+           class="]====])
+tp:escape(self.req.current_path == self:url_for("goals") and 'active' or '')
+tp:write([====[">
+          <i class="nf nf-oct-goal"></i>
+          <span data-show="$open" style="display: none;">Goals</span>
+        </a>
+        <a href="">
+          <i class="nf nf-fa-tasks"></i>
+          <span data-show="$open" style="display: none;">Tasks</span>
+        </a>
+        <a href="">
+          <i class="nf nf-fa-trophy"></i>
+          <span data-show="$open" style="display: none;">Achievements</span>
+        </a>
+        <a href="]====])
+tp:escape(self:url_for("profile"))
+tp:write([====["
+           title="Profile"
+           class="]====])
+tp:escape(self.req.current_path == self:url_for("profile") and 'active' or '')
+tp:write([====[">
+          <i class="nf nf-fa-user"></i>
+          <span data-show="$open" style="display: none;">Profile</span>
+        </a>
+        <form action="]====])
+tp:escape(self:url_for("logout"))
+tp:write([====[" method="POST">
+          <style>
+            me {
+              width: 100%;
+            }
+          </style>
+          <button title="Log out">
+            <i class="nf nf-md-exit_run"></i>
+            <span data-show="$open" style="display: none;">Log out</span>
+          </button>
+        </form>
+
+      </nav>
+    </div>
     <div>
       <style>
         me {
+          padding: var(--padding-md);
+          max-height: 100svh;
+          width: 100%;
+          overflow-y: scroll;
           display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          & img {
-            max-width: 2.5rem;
-          }
+          flex-direction: column;
+          gap: var(--gap-md);
         }
       </style>
-      <img src="/static/images/naira-coin-small.svg" alt="" data-show="$open" />
-      <button class="btn btn--white" data-on-click="$open = !$open">
-        <i class="nf nf-md-menu" data-show="$open == false"></i>
-        <i class="nf nf-md-close" data-show="$open == true"></i>
-      </button>
-
-    </div>
-    <nav>
-      <a href="]====])
-tp:escape(self:url_for("dashboard"))
-tp:write([====["
-         class="]====])
-tp:escape(self.req.current_path == self:url_for("dashboard") and 'active' or '')
-tp:write([====[">
-        <i class="nf nf-md-collage"></i>
-        <span data-show="$open">Dashboard</span>
-      </a>
-      <a href="]====])
-tp:escape(self:url_for("goals"))
-tp:write([====["
-         class="]====])
-tp:escape(self.req.current_path == self:url_for("goals") and 'active' or '')
-tp:write([====[">
-        <i class="nf nf-oct-goal"></i>
-        <span data-show="$open">Goals</span>
-      </a>
-      <a href="">
-        <i class="nf nf-fa-tasks"></i>
-        <span data-show="$open">Tasks</span>
-      </a>
-      <a href="">
-        <i class="nf nf-fa-trophy"></i>
-        <span data-show="$open">Achievements</span>
-      </a>
-      <a href="]====])
-tp:escape(self:url_for("profile"))
-tp:write([====["
-         class="]====])
-tp:escape(self.req.current_path == self:url_for("profile") and 'active' or '')
-tp:write([====[">
-        <i class="nf nf-fa-user"></i>
-        <span data-show="$open">Profile</span>
-      </a>
-      <form action="]====])
-tp:escape(self:url_for("logout"))
-tp:write([====[" method="POST">
-        <style>
-          me {
-            width: 100%;
-          }
-        </style>
-        <button>
-          <i class="nf nf-md-exit_run"></i>
-          <span data-show="$open">Log out</span>
-        </button>
-      </form>
-
-    </nav>
-  </div>
-  <div>
-    <style>
-      me {
-        padding: var(--padding-md);
-      }
-    </style>]====])
+      <div>
+        <h1>]====])
+tp:escape(head)
+tp:write([====[</h1>
+        <p>]====])
+tp:escape(sub_head)
+tp:write([====[</p>
+      </div>]====])
 content(tp, self)
 tp:write([====[</div>
-</div>]====])
+  </div>]====])
 end
 return home

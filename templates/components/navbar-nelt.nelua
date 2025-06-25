@@ -2,49 +2,49 @@ local nelt = require "...vendor.nelt.nelt"
 local http = require "...vendor.http-nelua.http"
 local function navbar(tp: *nelt.Template, self: *http.Server)
 tp:write([====[<div>
-  <style>
-    :root {
-      --nav-height: 4rem
-    }
-
-    me {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: black;
-      position: fixed;
-      top: 0;
-      height: var(--nav-height);
-      padding-block: var(--padding-sm);
-      padding-inline: var(--padding-md);
-      width: 100svw;
-      color: var(--font-color-inverse);
-
-      & img {
-        width: 3rem;
-      }
-    }
-  </style>
-  <a href="]====])
-tp:escape(self:url_for("index"))
-tp:write([====[">
-    <img src="/static/images/naira-coin-small.svg" alt="" />
-  </a>
-  <div>
     <style>
+      :root {
+        --nav-height: 4rem
+      }
+
       me {
         display: flex;
-        gap: var(--gap-sm);
+        justify-content: space-between;
+        align-items: center;
+        background: black;
+        position: fixed;
+        top: 0;
+        height: var(--nav-height);
+        padding-block: var(--padding-sm);
+        padding-inline: var(--padding-md);
+        width: 100svw;
+        color: var(--font-color-inverse);
 
+        & img {
+          width: 3rem;
+        }
       }
     </style>
     <a href="]====])
+tp:escape(self:url_for("index"))
+tp:write([====[">
+      <img src="/static/images/naira-coin-small.svg" alt="" />
+    </a>
+    <div>
+      <style>
+        me {
+          display: flex;
+          gap: var(--gap-sm);
+
+        }
+      </style>
+      <a href="]====])
 tp:escape(self:url_for("login"))
-tp:write([====[" class="btn btn--white">Log in</a>
-    <a href="]====])
+tp:write([====[" class="btn btn--inverse">Log in</a>
+      <a href="]====])
 tp:escape(self:url_for("signup"))
-tp:write([====[" class="btn btn--white">Sign Up</a>
-  </div>
-</div>]====])
+tp:write([====[" class="btn btn--inverse">Sign Up</a>
+    </div>
+  </div>]====])
 end
 return navbar

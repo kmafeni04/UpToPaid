@@ -11,7 +11,9 @@
   --transition-sm: 0.2s;
 
   --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
 
+  --padding-xs: 0.5rem;
   --padding-sm: 1rem;
   --padding-md: 1.5rem;
   --padding-lg: 3rem;
@@ -26,6 +28,18 @@
   --font-md: 1.5rem;
   --font-lg: 2rem;
   --font-xl: 3rem;
+
+  --box-shadow: 7px 5px 10px 0 rgb(80, 80, 80);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --font-xs: calc(0.75rem * 0.85);
+    --font-sm: calc(1rem * 0.85);
+    --font-md: calc(1.5rem * 0.85);
+    --font-lg: calc(2rem * 0.75);
+    --font-xl: calc(3rem * 0.75);
+  }
 }
 
 @media (prefers-color-scheme: light) {
@@ -140,40 +154,31 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: black;
   border: solid 1px black;
-  background-color: transparent;
-  height: 2.5rem;
+  height: 2rem;
+  padding-block: var(--padding-xs);
   padding-inline: var(--padding-sm);
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
   font-weight: bold;
   text-decoration: none;
+  color: var(--font-color-inverse);
   transition: var(--transition-sm);
 }
 
 .btn:hover {
-  background-color: black;
-  color: var(--font-color-inverse);
-  transition: var(--transition-sm);
-}
-
-.btn--inverse {
-  background-color: black;
-  color: var(--font-color-inverse);
-  transition: var(--transition-sm);
-}
-.btn--inverse:hover {
   background-color: transparent;
   color: var(--font-color);
   transition: var(--transition-sm);
 }
 
-.btn--white {
+.btn--inverse {
   border: solid 1px var(--font-color-inverse);
   color: var(--font-color-inverse);
 }
 
-& .btn--white:hover {
+.btn--inverse:hover {
   background-color: var(--font-color-inverse);
   color: var(--font-color);
 }
