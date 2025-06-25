@@ -4,7 +4,7 @@ local navbar = require ".components.navbar-nelt"
 local layout = require ".layout-nelt"
 local function content(tp: *nelt.Template, self: *http.Server)
 navbar(tp, self)
-tp:write([[<div>
+tp:write([====[<div>
   <style>
     me {
       display: flex;
@@ -49,9 +49,9 @@ tp:write([[<div>
       unlock achievements as you conquer your financial journey. Join today
       and game your way to financial success!
     </p>
-    <a href="]])
+    <a href="]====])
 tp:escape(self:url_for("signup"))
-tp:write([[" class="btn btn--inverse">
+tp:write([====[" class="btn btn--inverse">
       <style>
         me {
           display: flex;
@@ -63,7 +63,7 @@ tp:write([[" class="btn btn--inverse">
     </a>
   </div>
   <img src="/static/images/naira-coin-large.png" alt="" />
-</div>]])
+</div>]====])
 end
 local function index(tp: *nelt.Template, self: *http.Server)
 layout(tp, "", content, self)

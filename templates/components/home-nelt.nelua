@@ -2,7 +2,7 @@ local nelt = require "...vendor.nelt.nelt"
 local http = require "...vendor.http-nelua.http"
 local layout = require "..layout-nelt"
 local function home(tp: *nelt.Template, self: *http.Server, content: function(tp: *nelt.Template, self: *http.Server))
-tp:write([[<div>
+tp:write([====[<div>
   <style>
     me {
       display: flex;
@@ -103,21 +103,21 @@ tp:write([[<div>
 
     </div>
     <nav>
-      <a href="]])
+      <a href="]====])
 tp:escape(self:url_for("dashboard"))
-tp:write([["
-         class="]])
+tp:write([====["
+         class="]====])
 tp:escape(self.req.current_path == self:url_for("dashboard") and 'active' or '')
-tp:write([[">
+tp:write([====[">
         <i class="nf nf-md-collage"></i>
         <span data-show="$open">Dashboard</span>
       </a>
-      <a href="]])
+      <a href="]====])
 tp:escape(self:url_for("goals"))
-tp:write([["
-         class="]])
+tp:write([====["
+         class="]====])
 tp:escape(self.req.current_path == self:url_for("goals") and 'active' or '')
-tp:write([[">
+tp:write([====[">
         <i class="nf nf-oct-goal"></i>
         <span data-show="$open">Goals</span>
       </a>
@@ -129,18 +129,18 @@ tp:write([[">
         <i class="nf nf-fa-trophy"></i>
         <span data-show="$open">Achievements</span>
       </a>
-      <a href="]])
+      <a href="]====])
 tp:escape(self:url_for("profile"))
-tp:write([["
-         class="]])
+tp:write([====["
+         class="]====])
 tp:escape(self.req.current_path == self:url_for("profile") and 'active' or '')
-tp:write([[">
+tp:write([====[">
         <i class="nf nf-fa-user"></i>
         <span data-show="$open">Profile</span>
       </a>
-      <form action="]])
+      <form action="]====])
 tp:escape(self:url_for("logout"))
-tp:write([[" method="POST">
+tp:write([====[" method="POST">
         <style>
           me {
             width: 100%;
@@ -159,9 +159,9 @@ tp:write([[" method="POST">
       me {
         padding: var(--padding-md);
       }
-    </style>]])
+    </style>]====])
 content(tp, self)
-tp:write([[</div>
-</div>]])
+tp:write([====[</div>
+</div>]====])
 end
 return home

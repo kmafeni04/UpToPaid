@@ -3,7 +3,10 @@ local http = require "..vendor.http-nelua.http"
 local layout = require ".layout-nelt"
 local home = require ".components.home-nelt"
 local function dashboard_content(tp: *nelt.Template, self: *http.Server)
-tp:write([[<h1>Dashboard</h1>]])
+tp:write([====[<h1>Dashboard</h1>
+<p>Welcome,]====])
+tp:escape(" " .. self.session:get_val("current_user"))
+tp:write([====[</p>]====])
 end
 local function content(tp: *nelt.Template, self: *http.Server)
 home(tp, self, dashboard_content)

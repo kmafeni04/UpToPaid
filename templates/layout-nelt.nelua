@@ -5,15 +5,15 @@ tp: *nelt.Template,
 title: string,
 content: function(tp: *nelt.Template, self: *http.Server),
 self: *http.Server)
-tp:write([[<!DOCTYPE html>
+tp:write([====[<!DOCTYPE html>
 <html lang="en">
 
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>]])
+    <title>]====])
 tp:escape(title ~= "" and title or "SabiFinance")
-tp:write([[</title>
+tp:write([====[</title>
     <link rel="icon"
           href="/static/images/naira-coin-small.svg"
           type="image/svg+xml" />
@@ -69,10 +69,10 @@ tp:write([[</title>
     </script>
   </head>
 
-  <body>]])
+  <body>]====])
 content(tp, self)
-tp:write([[</body>
+tp:write([====[</body>
 
-</html>]])
+</html>]====])
 end
 return layout

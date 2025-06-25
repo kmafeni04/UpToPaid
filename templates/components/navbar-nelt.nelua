@@ -1,7 +1,7 @@
 local nelt = require "...vendor.nelt.nelt"
 local http = require "...vendor.http-nelua.http"
 local function navbar(tp: *nelt.Template, self: *http.Server)
-tp:write([[<div>
+tp:write([====[<div>
   <style>
     :root {
       --nav-height: 4rem
@@ -25,9 +25,9 @@ tp:write([[<div>
       }
     }
   </style>
-  <a href="]])
+  <a href="]====])
 tp:escape(self:url_for("index"))
-tp:write([[">
+tp:write([====[">
     <img src="/static/images/naira-coin-small.svg" alt="" />
   </a>
   <div>
@@ -38,13 +38,13 @@ tp:write([[">
 
       }
     </style>
-    <a href="]])
+    <a href="]====])
 tp:escape(self:url_for("login"))
-tp:write([[" class="btn btn--white">Log in</a>
-    <a href="]])
+tp:write([====[" class="btn btn--white">Log in</a>
+    <a href="]====])
 tp:escape(self:url_for("signup"))
-tp:write([[" class="btn btn--white">Sign Up</a>
+tp:write([====[" class="btn btn--white">Sign Up</a>
   </div>
-</div>]])
+</div>]====])
 end
 return navbar

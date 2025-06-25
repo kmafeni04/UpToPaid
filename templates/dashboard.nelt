@@ -5,6 +5,7 @@
 
 {% local function dashboard_content(tp: *nelt.Template, self: *http.Server) %}
 <h1>Dashboard</h1>
+<p>Welcome, {{ " " .. self.session:get_val("current_user") }}</p>
 {% end %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
