@@ -10,7 +10,7 @@ tp:write([[<div>
       height: 100svh;
     }
   </style>
-  <div data-signals-open="true"
+  <div data-signals-open="false"
        data-persist__session="open"
        data-class="{open: $open, closed: !$open}">
     <style>
@@ -154,7 +154,12 @@ tp:write([[" method="POST">
 
     </nav>
   </div>
-  <div>]])
+  <div>
+    <style>
+      me {
+        padding: var(--padding-md);
+      }
+    </style>]])
 content(tp, self)
 tp:write([[</div>
 </div>]])
