@@ -20,6 +20,12 @@
         max-width: 35rem
       }
     }
+
+    @media(max-width: 1200px) {
+      me>img {
+        display: none;
+      }
+    }
   </style>
   <div>
     <style>

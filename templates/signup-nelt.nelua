@@ -16,7 +16,8 @@ tp:write([[<div>
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100svh;
+      min-height: 100svh;
+      padding-top: var(--nav-height);
 
       & form {
         display: flex;
