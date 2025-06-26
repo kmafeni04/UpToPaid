@@ -29,10 +29,10 @@ local err = norm.migrate(db, {
     "1750497533",
     function(db: norm.Db): string
       local err = schema.create_table(db, "users", {
-        {"id", type.integer, { primary_key = true }},
-        {"username", type.text, { unique = true }},
-        {"email", type.text, { unique = true }},
-        {"password", type.text}
+        { "id",       type.integer, { primary_key = true } },
+        { "username", type.text, { unique = true } },
+        { "email",    type.text, { unique = true } },
+        { "password", type.text }
       })
       return err
     end
@@ -45,6 +45,21 @@ local err = norm.migrate(db, {
         email = "test@test.com",
         password = bcrypt.encrypt("testpassword")
       }))
+      return err
+    end
+  },
+  {
+    "1750890982",
+    function(db: norm.Db): string
+      local err = schema.create_table(db, "transactions", {
+  			{ "id",          type.integer, { primary_key = true } },
+  			{ "date",        type.text },
+  			{ "name",        type.text },
+  			{ "amount",      type.real },
+  			{ "type",        type.text },
+  			{ "description", type.text },
+  			{ "user_id",     type.integer },
+  		})
       return err
     end
   }
@@ -61,7 +76,30 @@ app.static_headers = inline_map!(string, string, {
 })
 ## end
 
-local Users, err = norm.Model.new(&db, "users", "Users")
+local Users, err = norm.Model.new(&db, "users", "Users", {
+  rels = {
+    {
+      kind = norm.RelationKind.has_many,
+      rel = {
+        name = "transactions",
+        model_name = "Transactions",
+      }
+    }
+  }
+})
+assert(err == "", err)
+
+local Transactions, err = norm.Model.new(&db, "transactions", "Transactions", {
+  rels = {
+    {
+      kind = norm.RelationKind.belongs_to,
+      rel = {
+        name = "user",
+        model_name = "Users",
+      }
+    }
+  }
+})
 assert(err == "", err)
 
 app:get("index", "/", function(self: *http.Server): http.Response
@@ -110,6 +148,47 @@ app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Respo
   local tp: nelt.Template
   dashboard(&tp, self)
   return self:html(http.Status.OK, tp:tostring())
+end)
+
+app:post("transaction", "/transaction", function(self: *http.Server): http.Response
+  local sseg, err = datastar.ServerSentEventGenerator.new(self)
+  if err ~= "" then
+    return self:error(err)
+  end
+  local errors: sequence(string)
+  local date = self.req.params["date"]
+  if date == "" then
+    errors:push("<li>Date is required</li>")
+  end
+  local date_match = date:match("%d%d%d%d%-%d%d%-%d%d")
+  if not date_match then
+    errors:push("<li>Malformed date</li>")
+  end
+  local name = self.req.params["name"]
+  if name == "" then
+    errors:push("<li>Name is required</li>")
+  end
+  if #name < 3 then
+    errors:push("<li>Name must be 3 or more characters</li>")
+  end
+  local amount = self.req.params["amount"]
+  if not amount:match("^[%-+]?%d+%.?%d*$") then
+    errors:push("<li>Malformed number amount</li>")
+  end
+  local amount = tonumber(amount)
+  if amount <= 0 then
+    errors:push("<li>Amount must be greater than 0</li>")
+  end
+  local type = self.req.params["type"]
+  local desc = self.req.params["desc"]
+  if #errors > 0 then
+    sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors, "\n")))
+  else
+    sseg:merge_fragments('<ul id="errors"></ul>')
+    -- TODO: Handle transaction creation logic
+    sseg:merge_signals("{ popup: false }")
+  end
+  return sseg.resp
 end)
 
 app:get("goals", "/home/goals", function(self: *http.Server): http.Response

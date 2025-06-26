@@ -1,3 +1,4 @@
+require "os"
 local nelt = require "..vendor.nelt.nelt"
 local http = require "..vendor.http-nelua.http"
 local layout = require ".layout-nelt"
@@ -38,7 +39,7 @@ tp:write([====[<div>
       <p class="summary_amount">₦ 0</p>
     </div>
   </div>
-  <div>
+  <div data-signals-popup="false">
     <style>
       me {
         display: flex;
@@ -63,9 +64,17 @@ tp:write([====[<div>
             font-weight: 700;
           }
         }
+
+        @media(max-width: 768px) {
+          me button span:first-child {
+            display: none;
+          }
+        }
       </style>
       <p>Transactions</p>
-      <button class="btn">New Transaction+</button>
+      <button class="btn"  data-on-click="$popup = true">
+        <span>New Transaction&nbsp;</span>+
+      </button>
     </div>
     <div>
       <style>
@@ -84,8 +93,114 @@ tp:write([====[<div>
         }
       </style>
       <p>Create a new Transaction</p>
-      <button class="btn">New Transaction+</button>
+      <button class="btn" data-on-click="$popup = true">New Transaction +</button>
     </div>
+  </div>
+
+  <div id="new-transaction-popup"
+       style="display: none"
+       data-show="$popup"
+       data-class="{open: $popup}">
+    <style>
+      me {
+        position: fixed;
+        width: 100svw;
+        height: 100svh;
+        top: 0;
+        left: 0;
+      }
+
+      me.open {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+    <div data-on-click="$popup = false">
+      <style>
+        me {
+          position: fixed;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(2px);
+        }
+      </style>
+    </div>
+
+    <form data-on-submit="@post(']====])
+tp:escape(self:url_for("transaction"))
+tp:write([====[', { contentType: 'form' })">
+      <style>
+        me {
+          background-color: white;
+          padding: var(--padding-md);
+          border-radius: var(--radius-md);
+          z-index: 1;
+        }
+      </style>
+      <div>
+        <style>
+          me {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: var(--gap-sm);
+
+            & .transaction-form-input {
+              display: flex;
+              flex-direction: column;
+              gap: var(--gap-xs);
+            }
+          }
+        </style>
+        <p>New transaction</p>
+        <div class="transaction-form-input">
+          <label for="date">Date:</label>
+          <input type="date"
+                 id="date"
+                 name="date"
+                 class="input"
+                 value="]====])
+tp:escape(os.date("%Y-%m-%d"))
+tp:write([====[" />
+        </div>
+        <div class="transaction-form-input">
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" class="input" />
+        </div>
+        <div class="transaction-form-input">
+          <label for="amount">Amount:</label>
+          <input type="number" id="amount"name="amount" class="input" min="1" />
+        </div>
+        <div class="transaction-form-input">
+          <label for="type">Type:</label>
+          <select id="type" name="type" class="btn">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <div class="transaction-form-input">
+          <label for="desc">Description:</label>
+          <input type="text" id="desc" name="desc" class="input" />
+        </div>
+        <ul id="errors">
+        </ul>
+        <div>
+          <style>
+            me {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: var(--gap-sm);
+            }
+          </style>
+          <button class="btn" type="button" data-on-click="$popup = false">Cancel</button>
+          <button class="btn">Submit</button>
+        </div>
+      </div>
+    </form>
+
   </div>]====])
 end
 local function content(tp: *nelt.Template, self: *http.Server)
