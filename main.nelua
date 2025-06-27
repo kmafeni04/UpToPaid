@@ -285,32 +285,36 @@ app:delete("transaction", "/transaction", function(self: *http.Server): http.Res
   if current_user_id == "" then
     return self:error("Failed to determine current_user")
   end
+
   local id = self.req.params["id"]
   if id == "" then
     return self:error()
   end
+
   local transaction, err = Transactions:find(inline_map!(string, string, {
     id = id
   }))
   if err ~= "" then
     return self:error(err)
   end
+
   local err = transaction:delete()
   if err ~= "" then
     return self:error(err)
   end
-  local transactions, err = Transactions:select(inline_map!(string, string, {
-    user_id = current_user_id
-  }))
+
+  local transactions_count, err = Transactions:count()
   if err ~= "" then
     return self:error(err)
   end
+
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
     return self:error(err)
   end
+
   sseg:execute_script(("document.getElementById('transaction-%s').remove()"):format(id))
-  if #transactions == 0 then
+  if transactions_count == 0 then
     local empty_transactions_table = require ".templates.fragments.empty-transactions-table-nelt"
     local tp: nelt.Template
     empty_transactions_table(&tp)
@@ -318,6 +322,7 @@ app:delete("transaction", "/transaction", function(self: *http.Server): http.Res
       selector = "#transactions-table",
     })
   end
+
   return sseg.resp
 end)
 
