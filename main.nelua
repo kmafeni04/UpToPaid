@@ -1,4 +1,3 @@
-require ".thirdparty.inline_map"
 
 local http = require ".vendor.http-nelua.http"
 local datastar = require ".vendor.http-nelua.extras.datastar.datastar"
@@ -8,6 +7,8 @@ local nelt = require ".vendor.nelt.nelt"
 local bcrypt = require ".utils.bcrypt"
 
 local auth_controller = require ".controllers.auth"
+
+require ".thirdparty.inline_map"
 
 
 ## if PROD then
@@ -133,6 +134,10 @@ app:post("logout", "/logout", function(self: *http.Server): http.Response
   if err ~= "" then
     return self:error(err)
   end
+  local err = self.session:set_val("current_user_id", "")
+  if err ~= "" then
+    return self:error(err)
+  end
   return self:redirect(self:url_for("index"))
 end)
 
@@ -141,16 +146,33 @@ app:get("home", "/home", function(self: *http.Server): http.Response
 end)
 
 app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Response
-  if self.session:get_val("current_user") == "" then
+  local current_user = self.session:get_val("current_user")
+  if current_user == "" then
     return self:redirect(self:url_for("login"))
   end
+  local current_user_id = self.session:get_val("current_user_id")
   local dashboard = require ".templates.dashboard-nelt"
   local tp: nelt.Template
+  local transactions, err = Transactions:select(inline_map!(string, string, {
+    user_id = current_user_id
+  }))
+  if err ~= "" then
+    return self:error(err)
+  end
+  tp.data = &transactions
+  if tp.data == nilptr then 
+    return self:error("")
+  end 
   dashboard(&tp, self)
   return self:html(http.Status.OK, tp:tostring())
 end)
 
+-- FIX: I don't believe the way I'm handling errors is correct as the route is only called via datastar
 app:post("transaction", "/transaction", function(self: *http.Server): http.Response
+  local current_user_id = self.session:get_val("current_user_id")
+  if current_user_id == "" then
+    return self:error("Failed to determine current_user")
+  end
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
     return self:error(err)
@@ -171,22 +193,130 @@ app:post("transaction", "/transaction", function(self: *http.Server): http.Respo
   if #name < 3 then
     errors:push("<li>Name must be 3 or more characters</li>")
   end
+
+  local amount_number: number
   local amount = self.req.params["amount"]
   if not amount:match("^[%-+]?%d+%.?%d*$") then
     errors:push("<li>Malformed number amount</li>")
+  else
+    amount_number = tonumber(amount)
   end
-  local amount = tonumber(amount)
-  if amount <= 0 then
+  if amount_number <= 0 then
     errors:push("<li>Amount must be greater than 0</li>")
   end
   local type = self.req.params["type"]
-  local desc = self.req.params["desc"]
+  if type == "" then
+    errors:push("<li>Name is required</li>")
+  end
+  if type ~= "income" and type ~= "expense" then
+    errors:push("<li>Unknown transaction type</li>")
+  end
+  local description = self.req.params["description"]
   if #errors > 0 then
-    sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors, "\n")))
+    sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
   else
-    sseg:merge_fragments('<ul id="errors"></ul>')
-    -- TODO: Handle transaction creation logic
-    sseg:merge_signals("{ popup: false }")
+    local transaction, err = Transactions:create(inline_map!(string, string, {
+			date = date,       
+			name = name,       
+			amount = amount,     
+			type = type,       
+			description = description,
+			user_id = current_user_id,    
+    }))
+    if err ~= "" then
+      sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
+    else
+      sseg:merge_fragments('<ul id="errors"></ul>')
+      local id = transaction:get_col("id")
+      if id == "1" then
+        sseg:merge_fragments([[
+          <table id="transactions-table">
+            <thead>
+              <tr>
+                <th>Date:</th>
+                <th>Name:</th>
+                <th>Amount:</th>
+                <th>Type:</th>
+                <th>Desc:</th>
+                <th>Action:</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-table-body">
+            </tbody>
+          </table>
+        ]])
+      end
+      sseg:merge_fragments(([[
+        <tr id="transaction-%s">
+        <td>%s</td>
+        <td>%s</td>
+        <td>%s</td>
+        <td>%s</td>
+        <td>%s</td>
+        <td>
+          <form data-on-submit="@delete('%s', { contentType: 'form' })">
+            <input type="hidden" name="id" value="%s">
+            <button class="btn">Delete</button>
+          </form>
+        </td>
+      </tr>
+      ]]):format(
+        id,
+        date,
+        name,
+        amount,
+        type,
+        description ~= "" and description or "-",
+        self:url_for("transaction"),
+        id
+       ), {
+        selector = "#transactions-table-body",
+        merge_mode = datastar.FragmentMergeMode.Append
+      })
+      sseg:merge_signals("{ popup: false }")
+    end
+  end
+  return sseg.resp
+end)
+
+-- FIX: I don't believe the way I'm handling errors is correct as the route is only called via datastar
+app:delete("transaction", "/transaction", function(self: *http.Server): http.Response
+  local current_user_id = self.session:get_val("current_user_id")
+  if current_user_id == "" then
+    return self:error("Failed to determine current_user")
+  end
+  local id = self.req.params["id"]
+  if id == "" then
+    return self:error()
+  end
+  local transaction, err = Transactions:find(inline_map!(string, string, {
+    id = id
+  }))
+  if err ~= "" then
+    return self:error(err)
+  end
+  local err = transaction:delete()
+  if err ~= "" then
+    return self:error(err)
+  end
+  local transactions, err = Transactions:select(inline_map!(string, string, {
+    user_id = current_user_id
+  }))
+  if err ~= "" then
+    return self:error(err)
+  end
+  local sseg, err = datastar.ServerSentEventGenerator.new(self)
+  if err ~= "" then
+    return self:error(err)
+  end
+  sseg:execute_script(("document.getElementById('transaction-%s').remove()"):format(id))
+  if #transactions == 0 then
+    local empty_transactions_table = require ".templates.fragments.empty-transactions-table-nelt"
+    local tp: nelt.Template
+    empty_transactions_table(&tp)
+    sseg:merge_fragments(tp:tostring(), {
+      selector = "#transactions-table",
+    })
   end
   return sseg.resp
 end)

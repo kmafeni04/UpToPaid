@@ -2,8 +2,13 @@
 
 {% local nelt = require "..vendor.nelt.nelt" %}
 {% local http = require "..vendor.http-nelua.http" %}
+{% local norm = require "..vendor.norm.norm" %}
+
 {% local layout = require ".layout-nelt" %}
+
 {% local home = require ".components.home-nelt" %}
+
+{% local empty_transactions_table = require ".fragments.empty-transactions-table-nelt" %}
 
 {% local function dashboard_content(tp: *nelt.Template, self: *http.Server) %}
   <div>
@@ -49,7 +54,7 @@
         gap: var(--gap-sm);
         background-color: white;
         width: 100%;
-        min-height: 13rem;
+        height: fit-content;
         padding: var(--padding-sm);
         border-radius: var(--radius-md);
         box-shadow: var(--box-shadow);
@@ -78,25 +83,42 @@
         <span>New Transaction&nbsp;</span>+
       </button>
     </div>
-    <div>
-      <style>
-        me {
-          display: flex;
-          flex-direction: column;
-          gap: var(--gap-sm);
-          align-items: center;
-          justify-content: center;
-
-          & p {
-            font-weight: 700;
-            font-size: var(--font-md);
-            text-align: center;
-          }
-        }
-      </style>
-      <p>Create a new Transaction</p>
-      <button class="btn" data-on-click="$popup = true">New Transaction +</button>
-    </div>
+    {% local transactions = (@*sequence(norm.Model.Inst))(tp.data) %}
+    {% if #transactions == 0 then %}
+    {% empty_transactions_table(tp) %}
+    {% else %}
+      <table id="transactions-table">
+        <thead>
+          <tr>
+            <th>Date:</th>
+            <th>Name:</th>
+            <th>Amount:</th>
+            <th>Type:</th>
+            <th>Desc:</th>
+            <th>Action:</th>
+          </tr>
+        </thead>
+        <tbody id="transactions-table-body">
+          {% for i, transaction in ipairs(transactions) do %}
+            {% local id =  transaction:get_col("id") %}
+            {% local description =  transaction:get_col("description") %}
+            <tr id="transaction-{{ id }}">
+              <td>{{ transaction:get_col("date") }}</td>
+              <td>{{ transaction:get_col("name") }}</td>
+              <td>{{ transaction:get_col("amount") }}</td>
+              <td>{{ transaction:get_col("type") }}</td>
+              <td>{{ description ~= "" and description or "-" }}</td>
+              <td>
+                <form data-on-submit="@delete('{{ self:url_for("transaction") }}', { contentType: 'form' })">
+                  <input type="hidden" name="id" value="{{ id }}">
+                  <button class="btn">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% end %}
+        </tbody>
+      </table>
+    {% end %}
   </div>
 
   <div id="new-transaction-popup"
@@ -136,6 +158,8 @@
           background-color: white;
           padding: var(--padding-md);
           border-radius: var(--radius-md);
+          width: 30svw;
+          min-width: 20rem;
           z-index: 1;
         }
       </style>
@@ -152,6 +176,11 @@
               flex-direction: column;
               gap: var(--gap-xs);
             }
+
+            & #errors {
+              color: red;
+              list-style: inside;
+            }
           }
         </style>
         <p>New transaction</p>
@@ -161,7 +190,7 @@
                  id="date"
                  name="date"
                  class="input"
-                 value="{{ os.date("%Y-%m-%d") }}" />
+                 value="{{ os.date("!%Y-%m-%d") }}" />
         </div>
         <div class="transaction-form-input">
           <label for="name">Name:</label>
@@ -169,7 +198,12 @@
         </div>
         <div class="transaction-form-input">
           <label for="amount">Amount:</label>
-          <input type="number" id="amount"name="amount" class="input" min="1" />
+          <input type="number"
+                 id="amount"
+                 name="amount"
+                 class="input"
+                 min="1"
+                 step="0.01" />
         </div>
         <div class="transaction-form-input">
           <label for="type">Type:</label>
@@ -179,8 +213,8 @@
           </select>
         </div>
         <div class="transaction-form-input">
-          <label for="desc">Description:</label>
-          <input type="text" id="desc" name="desc" class="input" />
+          <label for="description">Description:</label>
+          <input type="text" id="description" name="description" class="input" />
         </div>
         <ul id="errors">
         </ul>

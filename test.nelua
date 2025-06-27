@@ -1,3 +1,0 @@
-local nelt = require ".vendor.nelt.nelt"
-local ok, err = nelt.compile_file("./templates/dashboard.nelt")
-assert(ok, err)

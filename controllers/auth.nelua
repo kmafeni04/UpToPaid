@@ -60,6 +60,7 @@ function auth.login_post(self: *http.Server, Users: norm.Model)
     return self:html(http.Status.OK, tp:tostring())
   end
   self.session:set_val("current_user", username)
+  self.session:set_val("current_user_id", user:get_col("id"))
   return self:redirect(self:url_for("dashboard"))
 end
 
@@ -142,6 +143,7 @@ function auth.signup_post(self: *http.Server, Users: norm.Model): http.Response
     return self:error(err)
   end
   self.session:set_val("current_user", username)
+  self.session:set_val("current_user_id", user:get_col("id"))
   return self:redirect(self:url_for("dashboard"))
 end
 

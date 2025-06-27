@@ -1,0 +1,26 @@
+{% local nelt = require "...vendor.nelt.nelt" %}
+
+{% local function empty_transactions_table(tp: *nelt.Template) %}
+  <div id="transactions-table">
+    <style>
+      me {
+        display: flex;
+        flex-direction: column;
+        padding-block: var(--padding-md);
+        gap: var(--gap-sm);
+        align-items: center;
+        justify-content: center;
+
+        & p {
+          font-weight: 700;
+          font-size: var(--font-md);
+          text-align: center;
+        }
+      }
+    </style>
+    <p>No Transactions</p>
+    <button class="btn" data-on-click="$popup = true">New Transaction +</button>
+  </div>
+{% end %}
+
+{% return empty_transactions_table %}
