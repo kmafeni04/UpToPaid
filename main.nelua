@@ -25,46 +25,39 @@ local db, err = norm.Db.new({
 local schema = norm.Schema
 local type = schema.ColumnType
 
-local err = norm.migrate(db, {
-  {
-    "1750497533",
-    function(db: norm.Db): string
-      local err = schema.create_table(db, "users", {
-        { "id",       type.integer, { primary_key = true } },
-        { "username", type.text, { unique = true } },
-        { "email",    type.text, { unique = true } },
-        { "password", type.text }
-      })
-      return err
-    end
-  },
-  {
-    "1750722036",
-    function(db: norm.Db): string
-      local _, err = db:insert("users", inline_map!(string, string, {
-        username = "testuser",
-        email = "test@test.com",
-        password = bcrypt.encrypt("testpassword")
-      }))
-      return err
-    end
-  },
-  {
-    "1750890982",
-    function(db: norm.Db): string
-      local err = schema.create_table(db, "transactions", {
-  			{ "id",          type.integer, { primary_key = true } },
-  			{ "date",        type.text },
-  			{ "name",        type.text },
-  			{ "amount",      type.real },
-  			{ "type",        type.text },
-  			{ "description", type.text },
-  			{ "user_id",     type.integer },
-  		})
-      return err
-    end
-  }
-})
+local err = norm.migrate(db, inline_map!(string, norm.Schema.MigrationFn, {
+  ["1750497533"] = function(db: norm.Db): string
+    local err = schema.create_table(db, "users", {
+      { "id",       type.integer, { primary_key = true } },
+      { "username", type.text, { unique = true } },
+      { "email",    type.text, { unique = true } },
+      { "password", type.text }
+    })
+    return err
+  end,
+
+  ["1750722036"] = function(db: norm.Db): string
+    local _, err = db:insert("users", inline_map!(string, string, {
+      username = "testuser",
+      email = "test@test.com",
+      password = bcrypt.encrypt("testpassword")
+    }))
+    return err
+  end,
+
+  ["1750890982"] = function(db: norm.Db): string
+    local err = schema.create_table(db, "transactions", {
+			{ "id",          type.integer, { primary_key = true } },
+			{ "date",        type.text },
+			{ "name",        type.text },
+			{ "amount",      type.real },
+			{ "type",        type.text },
+			{ "description", type.text },
+			{ "user_id",     type.integer },
+		})
+    return err
+  end
+}))
 ## end
 
 local app = http.new({
@@ -234,21 +227,33 @@ app:post("transaction", "/transaction", function(self: *http.Server): http.Respo
       sseg:merge_fragments('<ul id="errors"></ul>')
       local id = transaction:get_col("id")
       if id == "1" then
-        sseg:merge_fragments([[
-          <table id="transactions-table">
-            <thead>
-              <tr>
-                <th>Date:</th>
-                <th>Name:</th>
-                <th>Amount:</th>
-                <th>Type:</th>
-                <th>Desc:</th>
-                <th>Action:</th>
-              </tr>
-            </thead>
-            <tbody id="transactions-table-body">
-            </tbody>
-          </table>]])
+        sseg:merge_fragments(
+          [[<table id="transactions-table">
+              <style>
+                me {
+                  width: 100%;
+                  border-collapse: collapse;
+                  text-align: left;
+
+                  & td {
+                    padding-block-start: var(--padding-sm);
+                  }
+                }
+              </style>
+              <thead>
+                <tr>
+                  <th>Date:</th>
+                  <th>Name:</th>
+                  <th>Amount:</th>
+                  <th>Type:</th>
+                  <th>Desc:</th>
+                  <th>Action:</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-table-body">
+              </tbody>
+            </table>]]
+        )
       end
       local transaction_row = require ".templates.components.transaction-row-nelt" 
       local tp: nelt.Template

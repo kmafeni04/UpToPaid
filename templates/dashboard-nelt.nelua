@@ -20,7 +20,7 @@ tp:write([====[<div>
           height: 13rem;
           border-radius: var(--radius-md);
           box-shadow: var(--box-shadow);
-          padding: var(--padding-sm);
+          padding: var(--padding-md);
 
           & .summary_amount {
             font-weight: 700;
@@ -51,7 +51,7 @@ tp:write([====[<div>
         background-color: white;
         width: 100%;
         height: fit-content;
-        padding: var(--padding-sm);
+        padding: var(--padding-md);
         border-radius: var(--radius-md);
         box-shadow: var(--box-shadow);
       }
@@ -84,6 +84,17 @@ if #transactions == 0 then
 empty_transactions_table(tp)
 else
 tp:write([====[<table id="transactions-table">
+        <style>
+          me {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+
+            & td {
+              padding-block-start: var(--padding-sm);
+            }
+          }
+        </style>
         <thead>
           <tr>
             <th>Date:</th>
