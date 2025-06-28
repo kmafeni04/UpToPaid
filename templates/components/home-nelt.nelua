@@ -151,9 +151,9 @@ tp:write([====[">
           <i class="nf nf-fa-user"></i>
           <span data-show="$open" style="display: none;">Profile</span>
         </a>
-        <form action="]====])
+        <form data-on-submit="confirm('Are you sure you would like to logout?') && @post(']====])
 tp:escape(self:url_for("logout"))
-tp:write([====[" method="POST">
+tp:write([====[')">
           <style>
             me {
               width: 100%;

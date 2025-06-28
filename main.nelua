@@ -138,7 +138,12 @@ app:post("logout", "/logout", function(self: *http.Server): http.Response
   if err ~= "" then
     return self:error(err)
   end
-  return self:redirect(self:url_for("index"))
+  local sseg, err = datastar.ServerSentEventGenerator.new(self)
+  if err ~= "" then
+    return self:error(err)
+  end
+  sseg:redirect(self:url_for("index"))
+  return sseg.resp
 end)
 
 app:get("home", "/home", function(self: *http.Server): http.Response
@@ -243,33 +248,13 @@ app:post("transaction", "/transaction", function(self: *http.Server): http.Respo
             </thead>
             <tbody id="transactions-table-body">
             </tbody>
-          </table>
-        ]])
+          </table>]])
       end
-      sseg:merge_fragments(([[
-        <tr id="transaction-%s">
-        <td>%s</td>
-        <td>%s</td>
-        <td>%s</td>
-        <td>%s</td>
-        <td>%s</td>
-        <td>
-          <form data-on-submit="@delete('%s', { contentType: 'form' })">
-            <input type="hidden" name="id" value="%s">
-            <button class="btn">Delete</button>
-          </form>
-        </td>
-      </tr>
-      ]]):format(
-        id,
-        date,
-        name,
-        amount,
-        type,
-        description ~= "" and description or "-",
-        self:url_for("transaction"),
-        id
-       ), {
+      local transaction_row = require ".templates.components.transaction-row-nelt" 
+      local tp: nelt.Template
+      -- using amount_number to preserve the decimal point in case the returned value is a single digit
+      transaction_row(&tp, id, date, name, tostring(amount_number), type, description ~= "" and description or "-", self:url_for("transaction"))
+      sseg:merge_fragments(tp:tostring(), {
         selector = "#transactions-table-body",
         merge_mode = datastar.FragmentMergeMode.Append
       })

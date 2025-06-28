@@ -1,0 +1,33 @@
+local nelt = require "...vendor.nelt.nelt"
+local function transaction_row(tp: *nelt.Template, id: string, date: string, name: string, amount: string, type: string, description: string, url: string)
+tp:write([====[<tr id="transaction-]====])
+tp:escape(id)
+tp:write([====[">
+    <td>]====])
+tp:escape(date)
+tp:write([====[</td>
+    <td>]====])
+tp:escape(name)
+tp:write([====[</td>
+    <td>]====])
+tp:escape(amount)
+tp:write([====[</td>
+    <td>]====])
+tp:escape(type)
+tp:write([====[</td>
+    <td>]====])
+tp:escape(description)
+tp:write([====[</td>
+    <td>
+      <form data-on-submit="confirm('Are you sure you would like to delete this record?') && @delete(']====])
+tp:escape(url)
+tp:write([====[', { contentType: 'form' })">
+        <input type="hidden" name="id" value="]====])
+tp:escape(id)
+tp:write([====[" />
+        <button class="btn">Delete</button>
+      </form>
+    </td>
+  </tr>]====])
+end
+return transaction_row

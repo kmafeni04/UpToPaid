@@ -141,7 +141,7 @@
           <i class="nf nf-fa-user"></i>
           <span data-show="$open" style="display: none;">Profile</span>
         </a>
-        <form action="{{ self:url_for("logout") }}" method="POST">
+        <form data-on-submit="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
           <style>
             me {
               width: 100%;

@@ -4,6 +4,7 @@ local http = require "..vendor.http-nelua.http"
 local norm = require "..vendor.norm.norm"
 local layout = require ".layout-nelt"
 local home = require ".components.home-nelt"
+local transaction_row = require ".components.transaction-row-nelt"
 local empty_transactions_table = require ".fragments.empty-transactions-table-nelt"
 local function dashboard_content(tp: *nelt.Template, self: *http.Server)
 tp:write([====[<div>
@@ -97,35 +98,15 @@ tp:write([====[<table id="transactions-table">
 for i, transaction in ipairs(transactions) do
 local id =  transaction:get_col("id")
 local description =  transaction:get_col("description")
-tp:write([====[<tr id="transaction-]====])
-tp:escape(id)
-tp:write([====[">
-              <td>]====])
-tp:escape(transaction:get_col("date"))
-tp:write([====[</td>
-              <td>]====])
-tp:escape(transaction:get_col("name"))
-tp:write([====[</td>
-              <td>]====])
-tp:escape(transaction:get_col("amount"))
-tp:write([====[</td>
-              <td>]====])
-tp:escape(transaction:get_col("type"))
-tp:write([====[</td>
-              <td>]====])
-tp:escape(description ~= "" and description or "-")
-tp:write([====[</td>
-              <td>
-                <form data-on-submit="@delete(']====])
-tp:escape(self:url_for("transaction"))
-tp:write([====[', { contentType: 'form' })">
-                  <input type="hidden" name="id" value="]====])
-tp:escape(id)
-tp:write([====[">
-                  <button class="btn">Delete</button>
-                </form>
-              </td>
-            </tr>]====])
+transaction_row(tp,
+            id,
+            transaction:get_col("date"),
+            transaction:get_col("name"),
+            transaction:get_col("amount"),
+            transaction:get_col("type"),
+            description ~= "" and description or "-",
+            self:url_for("transaction")
+            )
 end
 tp:write([====[</tbody>
       </table>]====])
@@ -165,7 +146,7 @@ tp:write([====[</div>
 
     <form data-on-submit="@post(']====])
 tp:escape(self:url_for("transaction"))
-tp:write([====[', { contentType: 'form' })">
+tp:write([====[', { contentType: 'form' }) && event.target.reset()">
       <style>
         me {
           background-color: white;
@@ -205,11 +186,17 @@ tp:write([====[', { contentType: 'form' })">
                  class="input"
                  value="]====])
 tp:escape(os.date("!%Y-%m-%d"))
-tp:write([====[" />
+tp:write([====["
+                 required />
         </div>
         <div class="transaction-form-input">
           <label for="name">Name:</label>
-          <input type="text" id="name" name="name" class="input" />
+          <input type="text"
+                 id="name"
+                 name="name"
+                 class="input"
+                 minlength="3"
+                 required />
         </div>
         <div class="transaction-form-input">
           <label for="amount">Amount:</label>
@@ -218,11 +205,12 @@ tp:write([====[" />
                  name="amount"
                  class="input"
                  min="1"
-                 step="0.01" />
+                 step="0.01"
+                 required />
         </div>
         <div class="transaction-form-input">
           <label for="type">Type:</label>
-          <select id="type" name="type" class="btn">
+          <select id="type" name="type" class="btn" required>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
           </select>
