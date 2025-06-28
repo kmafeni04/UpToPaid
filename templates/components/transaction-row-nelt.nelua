@@ -1,6 +1,6 @@
 local nelt = require "...vendor.nelt.nelt"
 local function transaction_row(tp: *nelt.Template, id: string, date: string, name: string, amount: string, type: string, description: string, url: string)
-tp:write([====[<tr id="transaction-]====])
+tp:write([====[<tr id="transaction_]====])
 tp:escape(id)
 tp:write([====[">
     <td>]====])

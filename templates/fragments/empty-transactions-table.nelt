@@ -1,7 +1,7 @@
 {% local nelt = require "...vendor.nelt.nelt" %}
 
 {% local function empty_transactions_table(tp: *nelt.Template) %}
-  <div id="transactions-table">
+  <div id="transactions_table">
     <style>
       me {
         display: flex;

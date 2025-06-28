@@ -1,6 +1,6 @@
 local nelt = require "...vendor.nelt.nelt"
 local function empty_transactions_table(tp: *nelt.Template)
-tp:write([====[<div id="transactions-table">
+tp:write([====[<div id="transactions_table">
     <style>
       me {
         display: flex;

@@ -12,6 +12,18 @@
 {% local empty_transactions_table = require ".fragments.empty-transactions-table-nelt" %}
 
 {% local function dashboard_content(tp: *nelt.Template, self: *http.Server) %}
+  {% local transactions = (@*sequence(norm.Model.Inst))(tp.data) %}
+  {% local transaction_income: number %}
+  {% local transaction_expenses: number %}
+  {% for _, transaction in ipairs(transactions) do %}
+    {% if transaction:get_col("type") == "Income" then %}
+      {% local num = transaction:get_col("amount") %}
+      {% transaction_income = transaction_income + tonumber(num) %}
+    {% elseif transaction:get_col("type") == "Expense" then %}
+      {% local num = transaction:get_col("amount") %}
+      {% transaction_expenses = transaction_expenses + tonumber(num) %}
+    {% end %}
+  {% end %}
   <div>
     <style>
       me {
@@ -34,17 +46,17 @@
         }
       }
     </style>
-    <div>
+    <div data-signals-transaction_income="{{ transaction_income }}">
       <p>Income:</p>
-      <p class="summary_amount">₦ 0</p>
+      <p class="summary_amount" data-text="'₦ ' + $transaction_income">₦ 0</p>
     </div>
-    <div>
+    <div data-signals-transaction_expenses="{{ transaction_expenses }}">
       <p>Expenses:</p>
-      <p class="summary_amount">₦ 0</p>
+      <p class="summary_amount" data-text="'₦ ' + $transaction_expenses">₦ 0</p>
     </div>
-    <div>
+    <div data-computed-transaction_balance="$transaction_income - $transaction_expenses ">
       <p>Balance:</p>
-      <p class="summary_amount">₦ 0</p>
+      <p class="summary_amount" data-text="'₦ ' + $transaction_balance">₦ 0</p>
     </div>
   </div>
   <div data-signals-popup="false">
@@ -84,11 +96,10 @@
         <span>New Transaction&nbsp;</span>+
       </button>
     </div>
-    {% local transactions = (@*sequence(norm.Model.Inst))(tp.data) %}
     {% if #transactions == 0 then %}
     {% empty_transactions_table(tp) %}
     {% else %}
-      <table id="transactions-table">
+      <table id="transactions_table">
         <style>
           me {
             width: 100%;
@@ -110,7 +121,7 @@
             <th>Action:</th>
           </tr>
         </thead>
-        <tbody id="transactions-table-body">
+        <tbody id="transactions_table_body">
           {% for i, transaction in ipairs(transactions) do %}
             {% local id =  transaction:get_col("id") %}
             {% local description =  transaction:get_col("description") %}
@@ -129,7 +140,7 @@
     {% end %}
   </div>
 
-  <div id="new-transaction-popup"
+  <div id="new_transaction_popup"
        style="display: none"
        data-show="$popup"
        data-class="{open: $popup}">
@@ -223,8 +234,8 @@
         <div class="transaction-form-input">
           <label for="type">Type:</label>
           <select id="type" name="type" class="btn" required>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
           </select>
         </div>
         <div class="transaction-form-input">
