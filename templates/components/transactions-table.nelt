@@ -38,6 +38,12 @@
             display: none;
           }
 
+          & tbody {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-sm);
+          }
+
           & tr {
             display: flex;
             flex-direction: column;
@@ -47,11 +53,16 @@
           & td {
             display: flex;
             align-items: center;
-            gap: var(--gap-sm);
+            gap: var(--gap-xs);
+
+            &:first-child {
+              display: none;
+            }
 
             &::before {
               content: attr(data-cell) ": ";
               font-weight: 700;
+              text-transform: capitalize;
             }
           }
         }
@@ -59,6 +70,7 @@
     </style>
     <thead>
       <tr>
+        <th>#</th>
         <th>Date:</th>
         <th>Name:</th>
         <th>Amount:</th>
@@ -72,12 +84,13 @@
         {% local id =  transaction:get_col("id") %}
         {% local description =  transaction:get_col("description") %}
         <tr id="transaction_{{ id }}">
-          <td data-cell="Date">{{ transaction:get_col("date") }}</td>
-          <td data-cell="Name">{{ transaction:get_col("name") }}</td>
-          <td data-cell="Amount">{{ transaction:get_col("amount") }}</td>
-          <td data-cell="Type">{{ transaction:get_col("type") }}</td>
-          <td data-cell="Description">{{ description ~= "" and description or "-" }}</td>
-          <td data-cell="Action">
+          <td>{{ i }}.</td>
+          <td data-cell="date">{{ transaction:get_col("date") }}</td>
+          <td data-cell="name">{{ transaction:get_col("name") }}</td>
+          <td data-cell="amount">{{ transaction:get_col("amount") }}</td>
+          <td data-cell="type">{{ transaction:get_col("type") }}</td>
+          <td data-cell="description">{{ description ~= "" and description or "-" }}</td>
+          <td data-cell="action">
             <form data-on-submit="confirm('Are you sure you would like to delete this record?') && @delete('{{ self:url_for("transaction") }}', { contentType: 'form' })">
               <input type="hidden" name="id" value="{{ id }}" />
               <button class="btn">Delete</button>

@@ -307,9 +307,13 @@ app:delete("transaction", "/transaction", function(self: *http.Server): http.Res
     return self:error(err)
   end
 
-  sseg:execute_script(("document.getElementById('transaction_%s').remove()"):format(id))
-  sseg:merge_signals(([[{ "transaction_income": %s, "transaction_expenses": %s }]]):format(transaction_income, transaction_expenses))
-  if #transactions == 0 then
+  if #transactions > 0 then
+    local tp: nelt.Template
+    tp.data = &transactions
+    local transactions_table = require ".templates.components.transactions-table-nelt" 
+    transactions_table(&tp, self)
+    sseg:merge_fragments(tp:tostring())
+  else
     local empty_transactions_table = require ".templates.fragments.empty-transactions-table-nelt"
     local tp: nelt.Template
     empty_transactions_table(&tp)
@@ -317,6 +321,7 @@ app:delete("transaction", "/transaction", function(self: *http.Server): http.Res
       selector = "#transactions_table",
     })
   end
+  sseg:merge_signals(([[{ "transaction_income": %s, "transaction_expenses": %s }]]):format(transaction_income, transaction_expenses))
 
   return sseg.resp
 end)

@@ -37,6 +37,12 @@ tp:write([====[<table id="transactions_table">
             display: none;
           }
 
+          & tbody {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-sm);
+          }
+
           & tr {
             display: flex;
             flex-direction: column;
@@ -46,11 +52,16 @@ tp:write([====[<table id="transactions_table">
           & td {
             display: flex;
             align-items: center;
-            gap: var(--gap-sm);
+            gap: var(--gap-xs);
+
+            &:first-child {
+              display: none;
+            }
 
             &::before {
               content: attr(data-cell) ": ";
               font-weight: 700;
+              text-transform: capitalize;
             }
           }
         }
@@ -58,6 +69,7 @@ tp:write([====[<table id="transactions_table">
     </style>
     <thead>
       <tr>
+        <th>#</th>
         <th>Date:</th>
         <th>Name:</th>
         <th>Amount:</th>
@@ -73,22 +85,25 @@ local description =  transaction:get_col("description")
 tp:write([====[<tr id="transaction_]====])
 tp:escape(id)
 tp:write([====[">
-          <td data-cell="Date">]====])
+          <td>]====])
+tp:escape(i)
+tp:write([====[.</td>
+          <td data-cell="date">]====])
 tp:escape(transaction:get_col("date"))
 tp:write([====[</td>
-          <td data-cell="Name">]====])
+          <td data-cell="name">]====])
 tp:escape(transaction:get_col("name"))
 tp:write([====[</td>
-          <td data-cell="Amount">]====])
+          <td data-cell="amount">]====])
 tp:escape(transaction:get_col("amount"))
 tp:write([====[</td>
-          <td data-cell="Type">]====])
+          <td data-cell="type">]====])
 tp:escape(transaction:get_col("type"))
 tp:write([====[</td>
-          <td data-cell="Description">]====])
+          <td data-cell="description">]====])
 tp:escape(description ~= "" and description or "-")
 tp:write([====[</td>
-          <td data-cell="Action">
+          <td data-cell="action">
             <form data-on-submit="confirm('Are you sure you would like to delete this record?') && @delete(']====])
 tp:escape(self:url_for("transaction"))
 tp:write([====[', { contentType: 'form' })">
