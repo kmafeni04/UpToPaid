@@ -172,7 +172,7 @@ p {
   transition: var(--transition-sm);
 }
 
-.btn:active,
+.btn:focus,
 .btn:hover {
   background-color: transparent;
   color: var(--font-color);
@@ -184,7 +184,7 @@ p {
   color: var(--font-color-inverse);
 }
 
-.btn--inverse:active,
+.btn--inverse:focus,
 .btn--inverse:hover {
   background-color: var(--font-color-inverse);
   color: var(--font-color);

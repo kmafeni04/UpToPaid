@@ -32,7 +32,6 @@
           color: white;
           transition: var(--transition-sm);
 
-
           & nav {
             display: flex;
             flex-direction: column;
@@ -45,7 +44,7 @@
             }
 
             & a,
-            & button {
+            & form {
               display: flex;
               align-items: center;
               gap: var(--gap-xs);
@@ -60,7 +59,9 @@
                 margin-top: auto;
               }
 
-              &:hover {
+              &:hover,
+              &:focus,
+              &:focus-within {
                 background-color: rgba(255, 255, 255, 0.2);
                 transition: var(--transition-sm);
               }
@@ -117,7 +118,6 @@
              data-show="$open == true"
              style="display: none"></i>
         </button>
-
       </div>
       <nav>
         <a href="{{ self:url_for("dashboard") }}"
@@ -147,17 +147,11 @@
           <span data-show="$open" style="display: none;">Profile</span>
         </a>
         <form data-on-submit="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
-          <style>
-            me {
-              width: 100%;
-            }
-          </style>
           <button title="Log out">
             <i class="nf nf-md-exit_run"></i>
             <span data-show="$open" style="display: none;">Log out</span>
           </button>
         </form>
-
       </nav>
     </div>
     <div>
@@ -179,6 +173,7 @@
       {% content(tp, self) %}
     </div>
     <nav>
+      <!-- bottom nav -->
       <style>
         me {
           display: none;
@@ -200,7 +195,7 @@
             }
 
             & a,
-            & button {
+            & form {
               display: flex;
               align-items: center;
               justify-content: center;
@@ -211,6 +206,12 @@
               border-radius: var(--radius-sm);
               transition: var(--transition-sm);
               width: 100%;
+
+              &:focus,
+              &:focus-within {
+                background-color: rgba(255, 255, 255, 0.2);
+                transition: var(--transition-sm);
+              }
 
               &.active {
                 background-color: rgba(255, 255, 255, 0.3);
