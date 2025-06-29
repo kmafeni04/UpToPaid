@@ -42,7 +42,7 @@ local last_ran_time = 0
 
 ---@param root_dir string
 ---@param file_path string
----@param callback fun(): nil
+---@param callback fun(changed_file: string): nil
 local function check_modification(root_dir, file_path, callback)
   local attrs = lfs.attributes(file_path)
   if attrs and attrs.modification > current_time then
@@ -53,7 +53,7 @@ local function check_modification(root_dir, file_path, callback)
 
     if os.time() - last_ran_time >= delay then
       lfs.chdir(root_dir)
-      callback()
+      callback(file_path)
       last_ran_time = os.time()
     end
   end
@@ -74,7 +74,7 @@ end
 
 ---@param root string
 ---@param dir string
----@param callback fun(): nil
+---@param callback fun(changed_file: string): nil
 ---@param config? Config
 local function check_dir(root, dir, callback, config)
   local recursive = (config and type(config.recursive) == "boolean") and config.recursive or true
@@ -137,8 +137,10 @@ end
 
   -- If the directory is nil, it will use the current directory of the running process
   local luamon = require("luamon")
-  luamon(nil, function()
-    print("A file has changed")
+  luamon(nil, function(changed_file)
+    if changed_file then
+      print(changed_file .. " has changed")
+    end
   end)
 
   -- A third parameter `config` can be passed to customise how the monitoring behaves
@@ -148,13 +150,15 @@ end
     recursive = true,
     delay = 4
   }
-  luamon(nil, function()
-    print("A file has changed")
+  luamon(nil, function(changed_file)
+    if changed_file then
+      print(changed_file .. " has changed")
+    end
   end, config)
 
 ]]
 ---@param dir? string Absolute path to directory (defaults to current working directory)
----@param callback fun(): nil Function to call on file change
+---@param callback fun(changed_file: string?): nil Function to call on file change
 ---@param config? Config
 local function luamon(dir, callback, config)
   if dir then
@@ -173,7 +177,7 @@ local function luamon(dir, callback, config)
     delay = config.delay
   end
 
-  callback()
+  callback(nil)
 
   while true do
     check_dir(dir, dir, callback, config)

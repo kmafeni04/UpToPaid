@@ -1,4 +1,5 @@
 local http = require "..vendor.http-nelua.http"
+local datastar = require "..vendor.http-nelua.extras.datastar.datastar"
 local norm = require "..vendor.norm.norm"
 local nelt = require "..vendor.nelt.nelt"
 
@@ -145,6 +146,23 @@ function auth.signup_post(self: *http.Server, Users: norm.Model): http.Response
   self.session:set_val("current_user", username)
   self.session:set_val("current_user_id", user:get_col("id"))
   return self:redirect(self:url_for("dashboard"))
+end
+
+function auth.logout(self: *http.Server)
+  local err = self.session:set_val("current_user", "") 
+  if err ~= "" then
+    return self:error(err)
+  end
+  local err = self.session:set_val("current_user_id", "")
+  if err ~= "" then
+    return self:error(err)
+  end
+  local sseg, err = datastar.ServerSentEventGenerator.new(self)
+  if err ~= "" then
+    return self:error(err)
+  end
+  sseg:redirect(self:url_for("index"))
+  return sseg.resp
 end
 
 return auth
