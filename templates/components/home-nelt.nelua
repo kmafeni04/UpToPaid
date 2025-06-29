@@ -9,10 +9,16 @@ tp:write([====[<div>
         width: 100svw;
         height: 100svh;
       }
+
+      @media(max-width: 768px) {
+        me {
+          flex-direction: column;
+        }
     </style>
     <div data-signals-open="false"
          data-class="{open: $open, closed: !$open}"
          class="closed">
+      <!-- side nav -->
       <style>
         me {
           padding-block: var(--padding-md);
@@ -69,16 +75,15 @@ tp:write([====[<div>
           width: 15rem;
         }
 
-        @media(max-width: 768px) {
-          me.open {
-            position: fixed;
-            width: 100svw;
-            height: 100svh;
-          }
-        }
-
         me.closed {
           width: 5rem;
+          justify-content: center;
+        }
+
+        @media(max-width: 768px) {
+          me {
+            display: none;
+          }
         }
       </style>
       <div data-class="{open: $open, closed: !$open}" class="closed">
@@ -88,7 +93,7 @@ tp:write([====[<div>
             align-items: center;
 
             & img {
-              max-width: 2.5rem;
+              max-width: 2rem;
             }
           }
 
@@ -171,7 +176,7 @@ tp:write([====[')">
       <style>
         me {
           padding: var(--padding-md);
-          max-height: 100svh;
+          height: 100svh;
           width: 100%;
           overflow-y: scroll;
           display: flex;
@@ -189,6 +194,87 @@ tp:write([====[</p>
       </div>]====])
 content(tp, self)
 tp:write([====[</div>
+    <nav>
+      <style>
+        me {
+          display: none;
+
+        }
+
+        @media(max-width: 768px) {
+          me {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: var(--padding-xs);
+            background-color: black;
+            color: white;
+
+            & button {
+              background-color: transparent;
+              border: none;
+            }
+
+            & a,
+            & button {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: var(--gap-xs);
+              text-decoration: none;
+              font-size: var(--font-md);
+              padding: var(--padding-sm);
+              border-radius: var(--radius-sm);
+              transition: var(--transition-sm);
+              width: 100%;
+
+              &.active {
+                background-color: rgba(255, 255, 255, 0.3);
+              }
+            }
+          }
+      </style>
+      <a href="]====])
+tp:escape(self:url_for("dashboard"))
+tp:write([====["
+         title="Dashboard"
+         class="]====])
+tp:escape(self.req.current_path == self:url_for("dashboard") and 'active' or '')
+tp:write([====[">
+        <i class="nf nf-md-collage"></i>
+      </a>
+      <a href="]====])
+tp:escape(self:url_for("goals"))
+tp:write([====["
+         title="Goals"
+         class="]====])
+tp:escape(self.req.current_path == self:url_for("goals") and 'active' or '')
+tp:write([====[">
+        <i class="nf nf-oct-goal"></i>
+      </a>
+      <a href="">
+        <i class="nf nf-fa-tasks"></i>
+      </a>
+      <a href="">
+        <i class="nf nf-fa-trophy"></i>
+      </a>
+      <a href="]====])
+tp:escape(self:url_for("profile"))
+tp:write([====["
+         title="Profile"
+         class="]====])
+tp:escape(self.req.current_path == self:url_for("profile") and 'active' or '')
+tp:write([====[">
+        <i class="nf nf-fa-user"></i>
+      </a>
+      <form data-on-submit="confirm('Are you sure you would like to logout?') && @post(']====])
+tp:escape(self:url_for("logout"))
+tp:write([====[')">
+        <button title="Log out">
+          <i class="nf nf-md-exit_run"></i>
+        </button>
+      </form>
+    </nav>
   </div>]====])
 end
 return home

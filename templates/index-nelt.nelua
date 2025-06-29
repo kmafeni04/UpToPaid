@@ -51,13 +51,9 @@ tp:write([====[<div>
       </p>
       <a href="]====])
 tp:escape(self:url_for("signup"))
-tp:write([====[" class="btn">
-        <style>
-          me {
-            display: flex;
-            gap: var(--gap-xs);
-          }
-        </style>
+tp:write([====["
+         class="btn"
+         style="gap: var(--gap-xs)">
         Get started
         <i class="nf nf-cod-arrow_right"></i>
       </a>

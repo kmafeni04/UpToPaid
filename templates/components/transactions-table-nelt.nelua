@@ -1,0 +1,106 @@
+local nelt = require "...vendor.nelt.nelt"
+local http = require "...vendor.http-nelua.http"
+local norm = require "...vendor.norm.norm"
+local function transactions_table(tp: *nelt.Template, self: *http.Server)
+local transactions = (@*sequence(norm.Model.Inst))(tp.data)
+local transaction_income: number
+local transaction_expenses: number
+for _, transaction in ipairs(transactions) do
+if transaction:get_col("type") == "Income" then
+local num = transaction:get_col("amount")
+transaction_income = transaction_income + tonumber(num)
+elseif transaction:get_col("type") == "Expense" then
+local num = transaction:get_col("amount")
+transaction_expenses = transaction_expenses + tonumber(num)
+end
+end
+tp:write([====[<table id="transactions_table">
+    <style>
+      me {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+
+        & tr:nth-child(2n) {
+          background-color: var(--bg-clr);
+        }
+
+        & td,
+        & th {
+          padding: var(--padding-xs);
+        }
+      }
+
+      @media(max-width: 768px) {
+        me {
+          & thead {
+            display: none;
+          }
+
+          & tr {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-xs);
+          }
+
+          & td {
+            display: flex;
+            align-items: center;
+            gap: var(--gap-sm);
+
+            &::before {
+              content: attr(data-cell) ": ";
+              font-weight: 700;
+            }
+          }
+        }
+      }
+    </style>
+    <thead>
+      <tr>
+        <th>Date:</th>
+        <th>Name:</th>
+        <th>Amount:</th>
+        <th>Type:</th>
+        <th>Desc:</th>
+        <th>Action:</th>
+      </tr>
+    </thead>
+    <tbody id="transactions_table_body">]====])
+for i, transaction in ipairs(transactions) do
+local id =  transaction:get_col("id")
+local description =  transaction:get_col("description")
+tp:write([====[<tr id="transaction_]====])
+tp:escape(id)
+tp:write([====[">
+          <td data-cell="Date">]====])
+tp:escape(transaction:get_col("date"))
+tp:write([====[</td>
+          <td data-cell="Name">]====])
+tp:escape(transaction:get_col("name"))
+tp:write([====[</td>
+          <td data-cell="Amount">]====])
+tp:escape(transaction:get_col("amount"))
+tp:write([====[</td>
+          <td data-cell="Type">]====])
+tp:escape(transaction:get_col("type"))
+tp:write([====[</td>
+          <td data-cell="Description">]====])
+tp:escape(description ~= "" and description or "-")
+tp:write([====[</td>
+          <td data-cell="Action">
+            <form data-on-submit="confirm('Are you sure you would like to delete this record?') && @delete(']====])
+tp:escape(self:url_for("transaction"))
+tp:write([====[', { contentType: 'form' })">
+              <input type="hidden" name="id" value="]====])
+tp:escape(id)
+tp:write([====[" />
+              <button class="btn">Delete</button>
+            </form>
+          </td>
+        </tr>]====])
+end
+tp:write([====[</tbody>
+  </table>]====])
+end
+return transactions_table

@@ -52,13 +52,9 @@
         unlock achievements as you conquer your financial journey. Join today
         and game your way to financial success!
       </p>
-      <a href="{{ self:url_for("signup") }}" class="btn">
-        <style>
-          me {
-            display: flex;
-            gap: var(--gap-xs);
-          }
-        </style>
+      <a href="{{ self:url_for("signup") }}"
+         class="btn"
+         style="gap: var(--gap-xs)">
         Get started
         <i class="nf nf-cod-arrow_right"></i>
       </a>

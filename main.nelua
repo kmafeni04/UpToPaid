@@ -244,52 +244,13 @@ app:post("transaction", "/transaction", function(self: *http.Server): http.Respo
       end 
 
       sseg:merge_fragments('<ul id="errors"></ul>')
-      local id = transaction:get_col("id")
-      if id == "1" then
-        sseg:merge_fragments(
-          [[<table id="transactions_table">
-              <style>
-                me {
-                  width: 100%;
-                  border-collapse: collapse;
-                  text-align: left;
 
-                  & td {
-                    padding-block-start: var(--padding-sm);
-                  }
-                }
-              </style>
-              <thead>
-                <tr>
-                  <th>Date:</th>
-                  <th>Name:</th>
-                  <th>Amount:</th>
-                  <th>Type:</th>
-                  <th>Desc:</th>
-                  <th>Action:</th>
-                </tr>
-              </thead>
-              <tbody id="transactions_table_body">
-              </tbody>
-            </table>]]
-        )
-      end
-      local transaction_row = require ".templates.components.transaction-row-nelt" 
       local tp: nelt.Template
-      transaction_row(
-        &tp,
-        id,
-        date,
-        name,
-        tostring(amount_number), -- using amount_number to preserve the decimal point in case the returned value is a single digit
-        type,
-        description ~= "" and description or "-",
-        self:url_for("transaction")
-      )
-      sseg:merge_fragments(tp:tostring(), {
-        selector = "#transactions_table_body",
-        merge_mode = datastar.FragmentMergeMode.Append
-      })
+      tp.data = &transactions
+      local transactions_table = require ".templates.components.transactions-table-nelt" 
+      transactions_table(&tp, self)
+      sseg:merge_fragments(tp:tostring())
+
       sseg:merge_signals((
         [[{ "popup": false, "transaction_income": %s, "transaction_expenses": %s }]]
       ):format(transaction_income, transaction_expenses))

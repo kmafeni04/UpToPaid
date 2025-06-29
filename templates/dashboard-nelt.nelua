@@ -4,7 +4,7 @@ local http = require "..vendor.http-nelua.http"
 local norm = require "..vendor.norm.norm"
 local layout = require ".layout-nelt"
 local home = require ".components.home-nelt"
-local transaction_row = require ".components.transaction-row-nelt"
+local transactions_table = require ".components.transactions-table-nelt"
 local empty_transactions_table = require ".fragments.empty-transactions-table-nelt"
 local function dashboard_content(tp: *nelt.Template, self: *http.Server)
 local transactions = (@*sequence(norm.Model.Inst))(tp.data)
@@ -98,44 +98,7 @@ tp:write([====[">
 if #transactions == 0 then
 empty_transactions_table(tp)
 else
-tp:write([====[<table id="transactions_table">
-        <style>
-          me {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-
-            & td {
-              padding-block-start: var(--padding-sm);
-            }
-          }
-        </style>
-        <thead>
-          <tr>
-            <th>Date:</th>
-            <th>Name:</th>
-            <th>Amount:</th>
-            <th>Type:</th>
-            <th>Desc:</th>
-            <th>Action:</th>
-          </tr>
-        </thead>
-        <tbody id="transactions_table_body">]====])
-for i, transaction in ipairs(transactions) do
-local id =  transaction:get_col("id")
-local description =  transaction:get_col("description")
-transaction_row(tp,
-            id,
-            transaction:get_col("date"),
-            transaction:get_col("name"),
-            transaction:get_col("amount"),
-            transaction:get_col("type"),
-            description ~= "" and description or "-",
-            self:url_for("transaction")
-            )
-end
-tp:write([====[</tbody>
-      </table>]====])
+transactions_table(tp, self)
 end
 tp:write([====[</div>
 
@@ -148,6 +111,7 @@ tp:write([====[</div>
         position: fixed;
         width: 100svw;
         height: 100svh;
+        overflow-y: scroll;
         top: 0;
         left: 0;
       }
@@ -181,84 +145,86 @@ tp:write([====[', { contentType: 'form' }) && event.target.reset()">
           width: 30svw;
           min-width: 20rem;
           z-index: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: var(--gap-sm);
+
+          & .transaction-form-input {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-xs);
+          }
+
+          & #errors {
+            color: red;
+            list-style: inside;
+          }
+        }
+
+        @media(max-height: 600px) {
+          me {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+          }
+
         }
       </style>
+      <p>New transaction</p>
+      <div class="transaction-form-input">
+        <label for="date">Date:</label>
+        <input type="date"
+               id="date"
+               name="date"
+               class="input"
+               value="]====])
+tp:escape(os.date("!%Y-%m-%d"))
+tp:write([====["
+               required />
+      </div>
+      <div class="transaction-form-input">
+        <label for="name">Name:</label>
+        <input type="text"
+               id="name"
+               name="name"
+               class="input"
+               minlength="3"
+               required />
+      </div>
+      <div class="transaction-form-input">
+        <label for="amount">Amount:</label>
+        <input type="number"
+               id="amount"
+               name="amount"
+               class="input"
+               min="1"
+               step="0.01"
+               required />
+      </div>
+      <div class="transaction-form-input">
+        <label for="type">Type:</label>
+        <select id="type" name="type" class="btn" required>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+      </div>
+      <div class="transaction-form-input">
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" class="input" />
+      </div>
+      <ul id="errors">
+      </ul>
       <div>
         <style>
           me {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: space-between;
             gap: var(--gap-sm);
-
-            & .transaction-form-input {
-              display: flex;
-              flex-direction: column;
-              gap: var(--gap-xs);
-            }
-
-            & #errors {
-              color: red;
-              list-style: inside;
-            }
           }
         </style>
-        <p>New transaction</p>
-        <div class="transaction-form-input">
-          <label for="date">Date:</label>
-          <input type="date"
-                 id="date"
-                 name="date"
-                 class="input"
-                 value="]====])
-tp:escape(os.date("!%Y-%m-%d"))
-tp:write([====["
-                 required />
-        </div>
-        <div class="transaction-form-input">
-          <label for="name">Name:</label>
-          <input type="text"
-                 id="name"
-                 name="name"
-                 class="input"
-                 minlength="3"
-                 required />
-        </div>
-        <div class="transaction-form-input">
-          <label for="amount">Amount:</label>
-          <input type="number"
-                 id="amount"
-                 name="amount"
-                 class="input"
-                 min="1"
-                 step="0.01"
-                 required />
-        </div>
-        <div class="transaction-form-input">
-          <label for="type">Type:</label>
-          <select id="type" name="type" class="btn" required>
-            <option value="Income">Income</option>
-            <option value="Expense">Expense</option>
-          </select>
-        </div>
-        <div class="transaction-form-input">
-          <label for="description">Description:</label>
-          <input type="text" id="description" name="description" class="input" />
-        </div>
-        <ul id="errors">
-        </ul>
-        <div>
-          <style>
-            me {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              gap: var(--gap-sm);
-            }
-          </style>
-          <button class="btn" type="button" data-on-click="$popup = false">Cancel</button>
-          <button class="btn">Submit</button>
-        </div>
+        <button class="btn" type="button" data-on-click="$popup = false">Cancel</button>
+        <button class="btn">Submit</button>
       </div>
     </form>
 

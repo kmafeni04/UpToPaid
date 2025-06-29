@@ -11,10 +11,16 @@
         width: 100svw;
         height: 100svh;
       }
+
+      @media(max-width: 768px) {
+        me {
+          flex-direction: column;
+        }
     </style>
     <div data-signals-open="false"
          data-class="{open: $open, closed: !$open}"
          class="closed">
+      <!-- side nav -->
       <style>
         me {
           padding-block: var(--padding-md);
@@ -71,16 +77,15 @@
           width: 15rem;
         }
 
-        @media(max-width: 768px) {
-          me.open {
-            position: fixed;
-            width: 100svw;
-            height: 100svh;
-          }
-        }
-
         me.closed {
           width: 5rem;
+          justify-content: center;
+        }
+
+        @media(max-width: 768px) {
+          me {
+            display: none;
+          }
         }
       </style>
       <div data-class="{open: $open, closed: !$open}" class="closed">
@@ -90,7 +95,7 @@
             align-items: center;
 
             & img {
-              max-width: 2.5rem;
+              max-width: 2rem;
             }
           }
 
@@ -159,7 +164,7 @@
       <style>
         me {
           padding: var(--padding-md);
-          max-height: 100svh;
+          height: 100svh;
           width: 100%;
           overflow-y: scroll;
           display: flex;
@@ -173,6 +178,73 @@
       </div>
       {% content(tp, self) %}
     </div>
+    <nav>
+      <style>
+        me {
+          display: none;
+
+        }
+
+        @media(max-width: 768px) {
+          me {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: var(--padding-xs);
+            background-color: black;
+            color: white;
+
+            & button {
+              background-color: transparent;
+              border: none;
+            }
+
+            & a,
+            & button {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: var(--gap-xs);
+              text-decoration: none;
+              font-size: var(--font-md);
+              padding: var(--padding-sm);
+              border-radius: var(--radius-sm);
+              transition: var(--transition-sm);
+              width: 100%;
+
+              &.active {
+                background-color: rgba(255, 255, 255, 0.3);
+              }
+            }
+          }
+      </style>
+      <a href="{{ self:url_for("dashboard") }}"
+         title="Dashboard"
+         class="{{ self.req.current_path == self:url_for("dashboard") and 'active' or '' }}">
+        <i class="nf nf-md-collage"></i>
+      </a>
+      <a href="{{ self:url_for("goals") }}"
+         title="Goals"
+         class="{{ self.req.current_path == self:url_for("goals") and 'active' or '' }}">
+        <i class="nf nf-oct-goal"></i>
+      </a>
+      <a href="">
+        <i class="nf nf-fa-tasks"></i>
+      </a>
+      <a href="">
+        <i class="nf nf-fa-trophy"></i>
+      </a>
+      <a href="{{ self:url_for("profile") }}"
+         title="Profile"
+         class="{{ self.req.current_path == self:url_for("profile") and 'active' or '' }}">
+        <i class="nf nf-fa-user"></i>
+      </a>
+      <form data-on-submit="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
+        <button title="Log out">
+          <i class="nf nf-md-exit_run"></i>
+        </button>
+      </form>
+    </nav>
   </div>
 {% end %}
 
