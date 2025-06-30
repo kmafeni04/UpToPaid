@@ -185,6 +185,7 @@
             display: flex;
             justify-content: space-between;
             padding: var(--padding-xs);
+            gap: var(--gap-xs);
             background-color: black;
             color: white;
 
@@ -242,7 +243,6 @@
       <button title="Log out"
               data-on-click="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
         <i class="nf nf-md-exit_run"></i>
-        <span data-show="$open" style="display: none;">Log out</span>
       </button>
     </nav>
   </div>
