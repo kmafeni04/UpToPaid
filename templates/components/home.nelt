@@ -44,7 +44,7 @@
             }
 
             & a,
-            & form {
+            & button {
               display: flex;
               align-items: center;
               gap: var(--gap-xs);
@@ -146,12 +146,11 @@
           <i class="nf nf-fa-user"></i>
           <span data-show="$open" style="display: none;">Profile</span>
         </a>
-        <form data-on-submit="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
-          <button title="Log out">
-            <i class="nf nf-md-exit_run"></i>
-            <span data-show="$open" style="display: none;">Log out</span>
-          </button>
-        </form>
+        <button title="Log out"
+                data-on-click="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
+          <i class="nf nf-md-exit_run"></i>
+          <span data-show="$open" style="display: none;">Log out</span>
+        </button>
       </nav>
     </div>
     <div>
@@ -195,7 +194,7 @@
             }
 
             & a,
-            & form {
+            & button {
               display: flex;
               align-items: center;
               justify-content: center;
@@ -240,11 +239,11 @@
          class="{{ self.req.current_path == self:url_for("profile") and 'active' or '' }}">
         <i class="nf nf-fa-user"></i>
       </a>
-      <form data-on-submit="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
-        <button title="Log out">
-          <i class="nf nf-md-exit_run"></i>
-        </button>
-      </form>
+      <button title="Log out"
+              data-on-click="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
+        <i class="nf nf-md-exit_run"></i>
+        <span data-show="$open" style="display: none;">Log out</span>
+      </button>
     </nav>
   </div>
 {% end %}

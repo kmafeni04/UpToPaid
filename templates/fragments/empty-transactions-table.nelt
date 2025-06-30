@@ -1,6 +1,7 @@
 {% local nelt = require "...vendor.nelt.nelt" %}
+{% local http = require "...vendor.http-nelua.http" %}
 
-{% local function empty_transactions_table(tp: *nelt.Template) %}
+{% local function empty_transactions_table(tp: *nelt.Template, self: *http.Server) %}
   <div id="transactions_table">
     <style>
       me {
@@ -19,7 +20,8 @@
       }
     </style>
     <p>No Transactions</p>
-    <button class="btn" data-on-click="$popup = true">New Transaction +</button>
+    <button class="btn"
+            data-on-click="@get('{{ self:url_for("new_transaction") }}')">New Transaction +</button>
   </div>
 {% end %}
 

@@ -28,7 +28,7 @@ SOFTWARE.
 
 local lfs = require("lfs")
 local current_time = os.time()
-local delay = 4
+local delay = 2
 local last_ran_time = 0
 
 --- For files without extensions or full file_names, an `_` can be used in front of the filename. e.g. `_lua` or `_luamon.lua`
@@ -38,7 +38,7 @@ local last_ran_time = 0
 ---@field include_file_types? string[] File types to monitor (e.g., {"txt"})
 ---@field exclude_dirs? string[] Directories to ignore (relative to root)
 ---@field recursive? boolean Whether to check subdirectories. Default: true
----@field delay? integer Delay (in seconds) before triggering callback again. Default: 4
+---@field delay? integer Delay (in seconds) before triggering callback again. Default: 2
 
 ---@param root_dir string
 ---@param file_path string
