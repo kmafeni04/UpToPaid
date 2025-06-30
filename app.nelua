@@ -13,14 +13,25 @@ require ".thirdparty.inline_map"
 ## if PROD then
 -- postgres
 ## else
-local db, err = norm.Db.new({
-  kind = norm.DbKind.sqlite,
-  conn = {
-    sqlite = {
-      name = "app.db"
-    }
-  }
-})
+  ## if TEST then
+    local db, err = norm.Db.new({
+      kind = norm.DbKind.sqlite,
+      conn = {
+        sqlite = {
+          name = ":memory:"
+        }
+      }
+    })
+  ## else
+    local db, err = norm.Db.new({
+      kind = norm.DbKind.sqlite,
+      conn = {
+        sqlite = {
+          name = "app.db"
+        }
+      }
+    })
+  ## end
 local schema = norm.Schema
 local type = schema.ColumnType
 
@@ -64,9 +75,9 @@ local app = http.new({
 })
 
 ## if not PROD then
-app.static_headers = inline_map!(string, string, {
-  ["Cache-Control"] = ""
-})
+  app.static_headers = inline_map!(string, string, {
+    ["Cache-Control"] = ""
+  })
 ## end
 
 local Users, err = norm.Model.new(&db, "users", "Users", {
@@ -144,9 +155,6 @@ app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Respo
     return self:error(err)
   end
   tp.data = &transactions
-  if tp.data == nilptr then
-    return self:error("")
-  end
   dashboard(&tp, self)
   return self:html(http.Status.OK, tp:tostring())
 end)
@@ -264,6 +272,42 @@ app:post("transactions", "/transactions", function(self: *http.Server): http.Res
       ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
     end
   end
+  return sseg.resp
+end)
+
+app:get("update_transaction", "/transactions/:id/update", function(self: *http.Server): http.Response
+  local id = self.req.params["id"]
+  if id == "" then
+    return self:error("Transaction ID was an empty string")
+  end
+
+  local transaction, err = Transactions:find(inline_map!(string, string, {
+    id = id
+  }))
+  if err ~= "" then
+    return self:error(err)
+  end
+
+  local sseg, err = datastar.ServerSentEventGenerator.new(self)
+  if err ~= "" then
+    return self:error(err)
+  end
+
+  local date = transaction:get_col("date")
+  local name = transaction:get_col("name")
+  local amount = transaction:get_col("amount")
+  local type = transaction:get_col("type")
+  local description = transaction:get_col("description")
+
+  local transaction_form = require ".templates.components.transaction-form-nelt"
+
+  local tp: nelt.Template
+  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = inline_map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", date, name, amount, type, description)
+  sseg:merge_fragments(tp:tostring(), {
+    selector = "body",
+    merge_mode = datastar.FragmentMergeMode.Append
+  })
+
   return sseg.resp
 end)
 
@@ -412,42 +456,6 @@ app:delete("transaction", "/transactions/:id", function(self: *http.Server): htt
   return sseg.resp
 end)
 
-app:get("update_transaction", "/transactions/:id/update", function(self: *http.Server): http.Response
-  local id = self.req.params["id"]
-  if id == "" then
-    return self:error("Transaction ID was an empty string")
-  end
-
-  local transaction, err = Transactions:find(inline_map!(string, string, {
-    id = id
-  }))
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local sseg, err = datastar.ServerSentEventGenerator.new(self)
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local date = transaction:get_col("date")
-  local name = transaction:get_col("name")
-  local amount = transaction:get_col("amount")
-  local type = transaction:get_col("type")
-  local description = transaction:get_col("description")
-
-  local transaction_form = require ".templates.components.transaction-form-nelt"
-
-  local tp: nelt.Template
-  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = inline_map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", date, name, amount, type, description)
-  sseg:merge_fragments(tp:tostring(), {
-    selector = "body",
-    merge_mode = datastar.FragmentMergeMode.Append
-  })
-
-  return sseg.resp
-end)
-
 app:get("goals", "/home/goals", function(self: *http.Server): http.Response
   if self.session:get_val("current_user") == "" then
     return self:redirect(self:url_for("login"))
@@ -468,4 +476,9 @@ app:get("profile", "/home/profile", function(self: *http.Server): http.Response
   return self:html(http.Status.OK, tp:tostring())
 end)
 
-app:serve()
+## if TEST then
+  local test = require ".test"
+  test(app)
+## else
+  app:serve()
+## end
