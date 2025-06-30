@@ -83,11 +83,12 @@
       {% for i, transaction in ipairs(transactions) do %}
         {% local id =  transaction:get_col("id") %}
         {% local description =  transaction:get_col("description") %}
+        {% local amount = transaction:get_col("amount") %}
         <tr id="transaction_{{ id }}">
           <td>{{ i }}.</td>
           <td data-cell="date">{{ transaction:get_col("date") }}</td>
           <td data-cell="name">{{ transaction:get_col("name") }}</td>
-          <td data-cell="amount">{{ transaction:get_col("amount") }}</td>
+          <td data-cell="amount">{{ ("%.2f"):format(tonumber(amount) ) }}</td>
           <td data-cell="type">{{ transaction:get_col("type") }}</td>
           <td data-cell="description">{{ description ~= "" and description or "-" }}</td>
           <td data-cell="actions" style="display: flex; gap: var(--gap-xs)">

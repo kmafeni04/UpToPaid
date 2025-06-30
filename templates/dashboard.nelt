@@ -49,15 +49,18 @@
     </style>
     <div data-signals-transaction_income="{{ transaction_income }}">
       <p>Income:</p>
-      <p class="summary_amount" data-text="'₦ ' + $transaction_income">₦ 0</p>
+      <p class="summary_amount"
+         data-text="'₦ ' + $transaction_income.toFixed(2)">₦ 0.00</p>
     </div>
     <div data-signals-transaction_expenses="{{ transaction_expenses }}">
       <p>Expenses:</p>
-      <p class="summary_amount" data-text="'₦ ' + $transaction_expenses">₦ 0</p>
+      <p class="summary_amount"
+         data-text="'₦ ' + $transaction_expenses.toFixed(2)">₦ 0.00</p>
     </div>
     <div data-computed-transaction_balance="$transaction_income - $transaction_expenses ">
       <p>Balance:</p>
-      <p class="summary_amount" data-text="'₦ ' + $transaction_balance">₦ 0</p>
+      <p class="summary_amount"
+         data-text="'₦ ' + $transaction_balance.toFixed(2)">₦ 0.00</p>
     </div>
   </div>
   <div>

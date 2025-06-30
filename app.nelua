@@ -144,9 +144,9 @@ app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Respo
     return self:error(err)
   end
   tp.data = &transactions
-  if tp.data == nilptr then 
+  if tp.data == nilptr then
     return self:error("")
-  end 
+  end
   dashboard(&tp, self)
   return self:html(http.Status.OK, tp:tostring())
 end)
@@ -165,7 +165,7 @@ app:get("new_transaction", "/transactions/create", function(self: *http.Server):
     selector = "body",
     merge_mode = datastar.FragmentMergeMode.Append
   })
-  
+
   return sseg.resp
 end)
 
@@ -222,12 +222,12 @@ app:post("transactions", "/transactions", function(self: *http.Server): http.Res
     sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
   else
     local transaction, err = Transactions:create(inline_map!(string, string, {
-			date = date,       
-			name = name,       
-			amount = amount,     
-			type = type,       
+			date = date,
+			name = name,
+			amount = amount,
+			type = type,
 			description = description,
-			user_id = current_user_id,    
+			user_id = current_user_id,
     }))
     if err ~= "" then
       sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
@@ -239,29 +239,29 @@ app:post("transactions", "/transactions", function(self: *http.Server): http.Res
     if err ~= "" then
       sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
     else
-      local transaction_income: number 
-      local transaction_expenses: number 
-      for _, transaction in ipairs(transactions) do 
-        if transaction:get_col("type") == "Income" then 
-          local num = transaction:get_col("amount") 
-          transaction_income = transaction_income + tonumber(num) 
-        elseif transaction:get_col("type") == "Expense" then 
-          local num = transaction:get_col("amount") 
-          transaction_expenses = transaction_expenses + tonumber(num) 
-        end 
-      end 
+      local transaction_income: number
+      local transaction_expenses: number
+      for _, transaction in ipairs(transactions) do
+        if transaction:get_col("type") == "Income" then
+          local num = transaction:get_col("amount")
+          transaction_income = transaction_income + tonumber(num)
+        elseif transaction:get_col("type") == "Expense" then
+          local num = transaction:get_col("amount")
+          transaction_expenses = transaction_expenses + tonumber(num)
+        end
+      end
 
       sseg:remove_fragments("#transaction_form_popup")
 
       local tp: nelt.Template
       tp.data = &transactions
-      local transactions_table = require ".templates.components.transactions-table-nelt" 
+      local transactions_table = require ".templates.components.transactions-table-nelt"
       transactions_table(&tp, self)
       sseg:merge_fragments(tp:tostring())
 
       sseg:merge_signals((
         [[{ "transaction_income": %s, "transaction_expenses": %s }]]
-      ):format(transaction_income, transaction_expenses))
+      ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
     end
   end
   return sseg.resp
@@ -298,10 +298,10 @@ app:put("transaction", "/transactions/:id", function(self: *http.Server): http.R
   end
 
   local transaction, err = transaction:update(inline_map!(string, string, {
-		date = date,       
-		name = name,       
-		amount = amount,     
-		type = type,       
+		date = date,
+		name = name,
+		amount = amount,
+		type = type,
 		description = description,
   }))
   if err ~= "" then
@@ -317,29 +317,29 @@ app:put("transaction", "/transactions/:id", function(self: *http.Server): http.R
     return sseg.resp
   end
 
-  local transaction_income: number 
-  local transaction_expenses: number 
-  for _, transaction in ipairs(transactions) do 
-    if transaction:get_col("type") == "Income" then 
-      local num = transaction:get_col("amount") 
-      transaction_income = transaction_income + tonumber(num) 
-    elseif transaction:get_col("type") == "Expense" then 
-      local num = transaction:get_col("amount") 
-      transaction_expenses = transaction_expenses + tonumber(num) 
-    end 
-  end 
+  local transaction_income: number
+  local transaction_expenses: number
+  for _, transaction in ipairs(transactions) do
+    if transaction:get_col("type") == "Income" then
+      local num = transaction:get_col("amount")
+      transaction_income = transaction_income + tonumber(num)
+    elseif transaction:get_col("type") == "Expense" then
+      local num = transaction:get_col("amount")
+      transaction_expenses = transaction_expenses + tonumber(num)
+    end
+  end
 
   sseg:remove_fragments("#transaction_form_popup")
 
   local tp: nelt.Template
   tp.data = &transactions
-  local transactions_table = require ".templates.components.transactions-table-nelt" 
+  local transactions_table = require ".templates.components.transactions-table-nelt"
   transactions_table(&tp, self)
   sseg:merge_fragments(tp:tostring())
 
   sseg:merge_signals((
     [[{ "transaction_income": %s, "transaction_expenses": %s }]]
-  ):format(transaction_income, transaction_expenses))
+  ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
   return sseg.resp
 end)
 
@@ -374,17 +374,17 @@ app:delete("transaction", "/transactions/:id", function(self: *http.Server): htt
     return self:error(err)
   end
 
-  local transaction_income: number 
-  local transaction_expenses: number 
-  for _, transaction in ipairs(transactions) do 
-    if transaction:get_col("type") == "Income" then 
-      local num = transaction:get_col("amount") 
-      transaction_income = transaction_income + tonumber(num) 
-    elseif transaction:get_col("type") == "Expense" then 
-      local num = transaction:get_col("amount") 
-      transaction_expenses = transaction_expenses + tonumber(num) 
-    end 
-  end 
+  local transaction_income: number
+  local transaction_expenses: number
+  for _, transaction in ipairs(transactions) do
+    if transaction:get_col("type") == "Income" then
+      local num = transaction:get_col("amount")
+      transaction_income = transaction_income + tonumber(num)
+    elseif transaction:get_col("type") == "Expense" then
+      local num = transaction:get_col("amount")
+      transaction_expenses = transaction_expenses + tonumber(num)
+    end
+  end
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
@@ -394,7 +394,7 @@ app:delete("transaction", "/transactions/:id", function(self: *http.Server): htt
   if #transactions > 0 then
     local tp: nelt.Template
     tp.data = &transactions
-    local transactions_table = require ".templates.components.transactions-table-nelt" 
+    local transactions_table = require ".templates.components.transactions-table-nelt"
     transactions_table(&tp, self)
     sseg:merge_fragments(tp:tostring())
   else
@@ -405,7 +405,9 @@ app:delete("transaction", "/transactions/:id", function(self: *http.Server): htt
       selector = "#transactions_table",
     })
   end
-  sseg:merge_signals(([[{ "transaction_income": %s, "transaction_expenses": %s }]]):format(transaction_income, transaction_expenses))
+  sseg:merge_signals((
+    [[{ "transaction_income": %s, "transaction_expenses": %s }]]
+  ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
 
   return sseg.resp
 end)
@@ -442,7 +444,7 @@ app:get("update_transaction", "/transactions/:id/update", function(self: *http.S
     selector = "body",
     merge_mode = datastar.FragmentMergeMode.Append
   })
-  
+
   return sseg.resp
 end)
 
