@@ -5,9 +5,9 @@ local nelt = require "..vendor.nelt.nelt"
 
 local bcrypt = require "..utils.bcrypt"
 
-local auth = @record{}
+local auth_controller = @record{}
 
-function auth.login_get(self: *http.Server)
+function auth_controller.login_get(self: *http.Server)
   if self.session:get_val("current_user") ~= "" then
     return self:redirect(self:url_for("dashboard"))
   end
@@ -17,7 +17,7 @@ function auth.login_get(self: *http.Server)
   return self:html(http.Status.OK, tp:tostring())
 end
 
-function auth.login_post(self: *http.Server, Users: norm.Model)
+function auth_controller.login_post(self: *http.Server, Users: norm.Model)
   local errors: sequence(string)
   local username = self.req.params["username"]
   local password = self.req.params["password"]
@@ -65,7 +65,7 @@ function auth.login_post(self: *http.Server, Users: norm.Model)
   return self:redirect(self:url_for("dashboard"))
 end
 
-function auth.signup_get(self: *http.Server)
+function auth_controller.signup_get(self: *http.Server)
   if self.session:get_val("current_user") ~= "" then
     return self:redirect(self:url_for("dashboard"))
   end
@@ -75,7 +75,7 @@ function auth.signup_get(self: *http.Server)
   return self:html(http.Status.OK, tp:tostring())
 end
 
-function auth.signup_post(self: *http.Server, Users: norm.Model): http.Response
+function auth_controller.signup_post(self: *http.Server, Users: norm.Model): http.Response
   local errors: sequence(string)
   local username = self.req.params["username"]
   local email = self.req.params["email"]
@@ -148,7 +148,7 @@ function auth.signup_post(self: *http.Server, Users: norm.Model): http.Response
   return self:redirect(self:url_for("dashboard"))
 end
 
-function auth.logout(self: *http.Server)
+function auth_controller.logout(self: *http.Server)
   local err = self.session:set_val("current_user", "") 
   if err ~= "" then
     return self:error(err)
@@ -165,4 +165,4 @@ function auth.logout(self: *http.Server)
   return sseg.resp
 end
 
-return auth
+return auth_controller

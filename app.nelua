@@ -6,6 +6,7 @@ local nelt = require ".vendor.nelt.nelt"
 local bcrypt = require ".utils.bcrypt"
 
 local auth_controller = require ".controllers.auth"
+local transactions_controller = require ".controllers.transactions"
 
 require ".thirdparty.inline_map"
 
@@ -160,300 +161,23 @@ app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Respo
 end)
 
 app:get("new_transaction", "/transactions/create", function(self: *http.Server): http.Response
-  local sseg, err = datastar.ServerSentEventGenerator.new(self)
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local transaction_form = require ".templates.components.transaction-form-nelt"
-
-  local tp: nelt.Template
-  transaction_form(&tp,"@post('" .. self:url_for("transactions") .. "', { contentType: 'form' })",  os.date("!%Y-%m-%d"))
-  sseg:merge_fragments(tp:tostring(), {
-    selector = "body",
-    merge_mode = datastar.FragmentMergeMode.Append
-  })
-
-  return sseg.resp
+  return transactions_controller.new_transaction(self)
 end)
 
-local function validate_transactions_form(self: *http.Server)
-  local errors: sequence(string)
-  local date = self.req.params["date"]
-  if date == "" then
-    errors:push("<li>Date is required</li>")
-  end
-  local date_match = date:match("%d%d%d%d%-%d%d%-%d%d")
-  if not date_match then
-    errors:push("<li>Malformed date</li>")
-  end
-  local name = self.req.params["name"]
-  if name == "" then
-    errors:push("<li>Name is required</li>")
-  end
-  if #name < 3 then
-    errors:push("<li>Name must be 3 or more characters</li>")
-  end
-
-  local amount_number: number
-  local amount = self.req.params["amount"]
-  if not amount:match("^[%-+]?%d+%.?%d*$") then
-    errors:push("<li>Malformed number amount</li>")
-  else
-    amount_number = tonumber(amount)
-  end
-  if amount_number <= 0 then
-    errors:push("<li>Amount must be greater than 0</li>")
-  end
-  local type = self.req.params["type"]
-  if type == "" then
-    errors:push("<li>Name is required</li>")
-  end
-  if type ~= "Income" and type ~= "Expense" then
-    errors:push("<li>Unknown transaction type</li>")
-  end
-  local description = self.req.params["description"]
-  return errors, date, name, amount, type, description
-end
-
 app:post("transactions", "/transactions", function(self: *http.Server): http.Response
-  local current_user_id = self.session:get_val("current_user_id")
-  if current_user_id == "" then
-    return self:error("Failed to determine current_user")
-  end
-  local sseg, err = datastar.ServerSentEventGenerator.new(self)
-  if err ~= "" then
-    return self:error(err)
-  end
-  local errors, date, name, amount, type, description = validate_transactions_form(self)
-  if #errors > 0 then
-    sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
-  else
-    local transaction, err = Transactions:create(inline_map!(string, string, {
-			date = date,
-			name = name,
-			amount = amount,
-			type = type,
-			description = description,
-			user_id = current_user_id,
-    }))
-    if err ~= "" then
-      sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
-      return sseg.resp
-    end
-    local transactions, err = Transactions:select(inline_map!(string, string, {
-      user_id = current_user_id
-    }))
-    if err ~= "" then
-      sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
-    else
-      local transaction_income: number
-      local transaction_expenses: number
-      for _, transaction in ipairs(transactions) do
-        if transaction:get_col("type") == "Income" then
-          local num = transaction:get_col("amount")
-          transaction_income = transaction_income + tonumber(num)
-        elseif transaction:get_col("type") == "Expense" then
-          local num = transaction:get_col("amount")
-          transaction_expenses = transaction_expenses + tonumber(num)
-        end
-      end
-
-      sseg:remove_fragments("#transaction_form_popup")
-
-      local tp: nelt.Template
-      tp.data = &transactions
-      local transactions_table = require ".templates.components.transactions-table-nelt"
-      transactions_table(&tp, self)
-      sseg:merge_fragments(tp:tostring())
-
-      sseg:merge_signals((
-        [[{ "transaction_income": %s, "transaction_expenses": %s }]]
-      ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
-    end
-  end
-  return sseg.resp
+  return transactions_controller.transactions_post(self, Transactions)
 end)
 
 app:get("update_transaction", "/transactions/:id/update", function(self: *http.Server): http.Response
-  local id = self.req.params["id"]
-  if id == "" then
-    return self:error("Transaction ID was an empty string")
-  end
-
-  local transaction, err = Transactions:find(inline_map!(string, string, {
-    id = id
-  }))
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local sseg, err = datastar.ServerSentEventGenerator.new(self)
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local date = transaction:get_col("date")
-  local name = transaction:get_col("name")
-  local amount = transaction:get_col("amount")
-  local type = transaction:get_col("type")
-  local description = transaction:get_col("description")
-
-  local transaction_form = require ".templates.components.transaction-form-nelt"
-
-  local tp: nelt.Template
-  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = inline_map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", date, name, amount, type, description)
-  sseg:merge_fragments(tp:tostring(), {
-    selector = "body",
-    merge_mode = datastar.FragmentMergeMode.Append
-  })
-
-  return sseg.resp
+  return transactions_controller.update_transaction(self, Transactions)
 end)
 
 app:put("transaction", "/transactions/:id", function(self: *http.Server): http.Response
-  local current_user_id = self.session:get_val("current_user_id")
-  if current_user_id == "" then
-    return self:error("Failed to determine current_user")
-  end
-
-  local id = self.req.params["id"]
-  if id == "" then
-    return self:error("Transaction ID was an empty string")
-  end
-
-  local transaction, err = Transactions:find(inline_map!(string, string, {
-    id = id,
-    user_id = current_user_id
-  }))
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local sseg, err = datastar.ServerSentEventGenerator.new(self)
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local errors, date, name, amount, type, description = validate_transactions_form(self)
-  if #errors > 0 then
-    sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
-    return sseg.resp
-  end
-
-  local transaction, err = transaction:update(inline_map!(string, string, {
-		date = date,
-		name = name,
-		amount = amount,
-		type = type,
-		description = description,
-  }))
-  if err ~= "" then
-    sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
-    return sseg.resp
-  end
-
-  local transactions, err = Transactions:select(inline_map!(string, string, {
-    user_id = current_user_id
-  }))
-  if err ~= "" then
-    sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
-    return sseg.resp
-  end
-
-  local transaction_income: number
-  local transaction_expenses: number
-  for _, transaction in ipairs(transactions) do
-    if transaction:get_col("type") == "Income" then
-      local num = transaction:get_col("amount")
-      transaction_income = transaction_income + tonumber(num)
-    elseif transaction:get_col("type") == "Expense" then
-      local num = transaction:get_col("amount")
-      transaction_expenses = transaction_expenses + tonumber(num)
-    end
-  end
-
-  sseg:remove_fragments("#transaction_form_popup")
-
-  local tp: nelt.Template
-  tp.data = &transactions
-  local transactions_table = require ".templates.components.transactions-table-nelt"
-  transactions_table(&tp, self)
-  sseg:merge_fragments(tp:tostring())
-
-  sseg:merge_signals((
-    [[{ "transaction_income": %s, "transaction_expenses": %s }]]
-  ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
-  return sseg.resp
+  return transactions_controller.transaction_put(self, Transactions)
 end)
 
 app:delete("transaction", "/transactions/:id", function(self: *http.Server): http.Response
-  local current_user_id = self.session:get_val("current_user_id")
-  if current_user_id == "" then
-    return self:error("Failed to determine current_user")
-  end
-
-  local id = self.req.params["id"]
-  if id == "" then
-    return self:error()
-  end
-
-  local transaction, err = Transactions:find(inline_map!(string, string, {
-    id = id,
-    user_id = current_user_id
-  }))
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local err = transaction:delete()
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local transactions, err = Transactions:select(inline_map!(string, string, {
-    user_id = current_user_id
-  }))
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  local transaction_income: number
-  local transaction_expenses: number
-  for _, transaction in ipairs(transactions) do
-    if transaction:get_col("type") == "Income" then
-      local num = transaction:get_col("amount")
-      transaction_income = transaction_income + tonumber(num)
-    elseif transaction:get_col("type") == "Expense" then
-      local num = transaction:get_col("amount")
-      transaction_expenses = transaction_expenses + tonumber(num)
-    end
-  end
-
-  local sseg, err = datastar.ServerSentEventGenerator.new(self)
-  if err ~= "" then
-    return self:error(err)
-  end
-
-  if #transactions > 0 then
-    local tp: nelt.Template
-    tp.data = &transactions
-    local transactions_table = require ".templates.components.transactions-table-nelt"
-    transactions_table(&tp, self)
-    sseg:merge_fragments(tp:tostring())
-  else
-    local empty_transactions_table = require ".templates.fragments.empty-transactions-table-nelt"
-    local tp: nelt.Template
-    empty_transactions_table(&tp, self)
-    sseg:merge_fragments(tp:tostring(), {
-      selector = "#transactions_table",
-    })
-  end
-  sseg:merge_signals((
-    [[{ "transaction_income": %s, "transaction_expenses": %s }]]
-  ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
-
-  return sseg.resp
+  return transactions_controller.transaction_delete(self, Transactions)
 end)
 
 app:get("goals", "/home/goals", function(self: *http.Server): http.Response
