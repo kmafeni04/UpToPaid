@@ -19,7 +19,7 @@ end
 
 function auth_controller.login_post(self: *http.Server, Users: norm.Model)
   local errors: sequence(string)
-  local username = self.req.params["username"]
+  local username = http.utils.trim_wspace(self.req.params["username"])
   local password = self.req.params["password"]
 
   if username == "" then
@@ -40,17 +40,18 @@ function auth_controller.login_post(self: *http.Server, Users: norm.Model)
   end
   if not next(user.row) then
     errors:push("Username does not exist")
-  end
-  local stored_password_hash, err = user:get_col("password")
-  if err ~= "" then
-    return self:error(err)
-  end
-  local ok, err = bcrypt.verify(password, stored_password_hash)
-  if err ~= "" then
-    return self:error(err)
-  end
-  if not ok then
-    errors:push("Incorrect password")
+  else
+    local stored_password_hash, err = user:get_col("password")
+    if err ~= "" then
+      return self:error(err)
+    end
+    local ok, err = bcrypt.verify(password, stored_password_hash)
+    if err ~= "" then
+      return self:error(err)
+    end
+    if not ok then
+      errors:push("Incorrect password")
+    end
   end
 
   if #errors ~= 0 then
@@ -77,8 +78,8 @@ end
 
 function auth_controller.signup_post(self: *http.Server, Users: norm.Model): http.Response
   local errors: sequence(string)
-  local username = self.req.params["username"]
-  local email = self.req.params["email"]
+  local username = http.utils.trim_wspace(self.req.params["username"])
+  local email = http.utils.trim_wspace(self.req.params["email"]:lower())
   local password = self.req.params["password"]
   local confirm_password = self.req.params["confirm-password"]
 
