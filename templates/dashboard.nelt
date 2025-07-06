@@ -107,7 +107,79 @@
       {% transactions_table(tp, self) %}
     {% end %}
   </div>
+  <div>
+    <style>
+      me {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-sm);
+        background-color: white;
+        width: 100%;
+        height: fit-content;
+        padding: var(--padding-md);
+        border-radius: var(--radius-md);
+        box-shadow: var(--box-shadow);
 
+        & p {
+          font-weight: 700;
+        }
+      }
+    </style>
+    <p>Analytics</p>
+    {% if #transactions ~= 0 then %}
+      <div id="analytics">
+        <canvas id="analytics-chart"></canvas>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+          const ctx = document.getElementById("analytics-chart")
+          new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: [
+                /* beautify ignore:start */
+              {# TODO: I plant to order the transactions by date #}
+              {# If that is the case, I will need to filter the transactions by week, month and year #}
+              {# I think a bar chart of either day(mon-fri), month(jan-dec), year(2025-) will work fine #}
+              {# The particular time frame should be controlled by a select at the top level of the div #}
+              {# and submitted either on select or a specific sort button #}
+              /* beautify ignore:end */
+              ],
+              datasets: [{
+                label: "Income",
+                data: [
+                  /* beautify ignore:start */
+                /* beautify ignore:end */
+                ]
+              }, {
+                label: "Expenses",
+                data: [
+                  /* beautify ignore:start */
+                /* beautify ignore:end */
+                ]
+              }]
+            }
+          })
+        </script>
+      </div>
+    {% else %}
+      <div id="analytics">
+        <style>
+          me {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-block: var(--padding-md);
+
+            & p {
+              font-size: var(--font-md);
+            }
+          }
+        </style>
+
+        <p>No transactions</p>
+      </div>
+    {% end %}
+  </div>
 {% end %}
 
 {% local function content(tp: *nelt.Template, self: *http.Server) %}
