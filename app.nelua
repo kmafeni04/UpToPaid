@@ -71,7 +71,7 @@ local err = norm.migrate(db, inline_map!(string, norm.Schema.MigrationFn, {
 }))
 ## end
 
-local app = http.new({
+local app = http.Server.new({
   port = 8081
 })
 
