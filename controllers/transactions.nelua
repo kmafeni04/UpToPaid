@@ -20,9 +20,9 @@ function transactions_controller.new_transaction(self: *http.Server)
 
   local tp: nelt.Template
   transaction_form(&tp,"@post('" .. self:url_for("transactions") .. "', { contentType: 'form' })",  os.date("!%Y-%m-%d"))
-  sseg:merge_fragments(tp:tostring(), {
+  sseg:patch_elements(tp:tostring(), {
     selector = "body",
-    merge_mode = datastar.FragmentMergeMode.Append
+    mode = datastar.ElementPatchMode.Append
   })
 
   return sseg.resp
@@ -80,7 +80,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
 
   local errors, date, name, amount, type, description = validate_transactions_form(self)
   if #errors > 0 then
-    sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
+    sseg:patch_elements(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
     return sseg.resp
   end
 
@@ -93,7 +93,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
 		user_id = current_user_id,
   }))
   if err ~= "" then
-    sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
+    sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
   end
 
@@ -101,7 +101,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
     user_id = current_user_id
   }))
   if err ~= "" then
-    sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
+    sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
   end
 
@@ -117,18 +117,18 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
     end
   end
 
-  sseg:remove_fragments("#transaction_form_popup")
+  sseg:remove_elements("#transaction_form_popup")
 
   local tp: nelt.Template
   tp.data = &transactions
   transactions_table(&tp, self)
-  sseg:merge_fragments(tp:tostring())
+  sseg:patch_elements(tp:tostring())
 
   local tp: nelt.Template
   analytics_chart(&tp, self)
-  sseg:merge_fragments(tp:tostring())
+  sseg:patch_elements(tp:tostring())
 
-  sseg:merge_signals((
+  sseg:patch_signals((
     [[{ "transaction_income": %s, "transaction_expenses": %s }]]
   ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
   return sseg.resp
@@ -161,9 +161,9 @@ function transactions_controller.update_transaction(self: *http.Server, Transact
 
   local tp: nelt.Template
   transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = inline_map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", date, name, amount, type, description)
-  sseg:merge_fragments(tp:tostring(), {
+  sseg:patch_elements(tp:tostring(), {
     selector = "body",
-    merge_mode = datastar.FragmentMergeMode.Append
+    mode = datastar.ElementPatchMode.Append
   })
 
   return sseg.resp
@@ -195,7 +195,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
 
   local errors, date, name, amount, type, description = validate_transactions_form(self)
   if #errors > 0 then
-    sseg:merge_fragments(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
+    sseg:patch_elements(('<ul id="errors">%s</ul>'):format(string.concat(errors)))
     return sseg.resp
   end
 
@@ -207,7 +207,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
 		description = description,
   }))
   if err ~= "" then
-    sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
+    sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
   end
 
@@ -215,7 +215,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
     user_id = current_user_id
   }))
   if err ~= "" then
-    sseg:merge_fragments('<ul id="errors"><li>Internal error occured</li></ul>')
+    sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
   end
 
@@ -231,19 +231,19 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
     end
   end
 
-  sseg:remove_fragments("#transaction_form_popup")
+  sseg:remove_elements("#transaction_form_popup")
 
   local tp: nelt.Template
   tp.data = &transactions
   transactions_table(&tp, self)
-  sseg:merge_fragments(tp:tostring())
+  sseg:patch_elements(tp:tostring())
 
   local tp: nelt.Template
   tp.data = &transactions
   analytics_chart(&tp, self)
-  sseg:merge_fragments(tp:tostring())
+  sseg:patch_elements(tp:tostring())
 
-  sseg:merge_signals((
+  sseg:patch_signals((
     [[{ "transaction_income": %s, "transaction_expenses": %s }]]
   ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
   return sseg.resp
@@ -301,25 +301,21 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     local tp: nelt.Template
     tp.data = &transactions
     transactions_table(&tp, self)
-    sseg:merge_fragments(tp:tostring())
+    sseg:patch_elements(tp:tostring())
 
     local tp: nelt.Template
     tp.data = &transactions
     analytics_chart(&tp, self)
-    sseg:merge_fragments(tp:tostring())
+    sseg:patch_elements(tp:tostring())
   else
     local tp: nelt.Template
     empty_transactions_table(&tp, self)
-    sseg:merge_fragments(tp:tostring(), {
-      selector = "#transactions_table",
-    })
+    sseg:patch_elements(tp:tostring())
 
     empty_analytics_chart(&tp)
-    sseg:merge_fragments(tp:tostring(), {
-      selector = "#analytics",
-    })
+    sseg:patch_elements(tp:tostring())
   end
-  sseg:merge_signals((
+  sseg:patch_signals((
     [[{ "transaction_income": %s, "transaction_expenses": %s }]]
   ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
 
