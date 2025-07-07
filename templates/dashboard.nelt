@@ -9,8 +9,10 @@
 {% local home = require ".components.home-nelt" %}
 {% local transactions_table = require ".components.transactions-table-nelt" %}
 {% local transaction_form = require ".components.transaction-form-nelt" %}
+{% local analytics_chart = require ".components.analytics-chart-nelt" %}
 
 {% local empty_transactions_table = require ".fragments.empty-transactions-table-nelt" %}
+{% local empty_analytics_chart = require ".fragments.empty-analytics-chart-nelt" %}
 
 {% local function dashboard_content(tp: *nelt.Template, self: *http.Server) %}
   {% local transactions = (@*sequence(norm.Model.Inst))(tp.data) %}
@@ -127,57 +129,9 @@
     </style>
     <p>Analytics</p>
     {% if #transactions ~= 0 then %}
-      <div id="analytics">
-        <canvas id="analytics-chart"></canvas>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-          const ctx = document.getElementById("analytics-chart")
-          new Chart(ctx, {
-            type: "bar",
-            data: {
-              labels: [
-                /* beautify ignore:start */
-              {# TODO: I plant to order the transactions by date #}
-              {# If that is the case, I will need to filter the transactions by week, month and year #}
-              {# I think a bar chart of either day(mon-fri), month(jan-dec), year(2025-) will work fine #}
-              {# The particular time frame should be controlled by a select at the top level of the div #}
-              {# and submitted either on select or a specific sort button #}
-              /* beautify ignore:end */
-              ],
-              datasets: [{
-                label: "Income",
-                data: [
-                  /* beautify ignore:start */
-                /* beautify ignore:end */
-                ]
-              }, {
-                label: "Expenses",
-                data: [
-                  /* beautify ignore:start */
-                /* beautify ignore:end */
-                ]
-              }]
-            }
-          })
-        </script>
-      </div>
+      {% analytics_chart(tp, self) %}
     {% else %}
-      <div id="analytics">
-        <style>
-          me {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-block: var(--padding-md);
-
-            & p {
-              font-size: var(--font-md);
-            }
-          }
-        </style>
-
-        <p>No transactions</p>
-      </div>
+    {% empty_analytics_chart(tp) %}
     {% end %}
   </div>
 {% end %}

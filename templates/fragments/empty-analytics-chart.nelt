@@ -1,0 +1,22 @@
+{% local nelt = require "...vendor.nelt.nelt" %}
+{% local http = require "...vendor.http-nelua.http" %}
+
+{% local function empty_analytics_chart(tp: *nelt.Template) %}
+  <div id="analytics">
+    <style>
+      me {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-block: var(--padding-md);
+
+        & p {
+          font-size: var(--font-md);
+        }
+      }
+    </style>
+    <p>No transactions</p>
+  </div>
+{% end %}
+
+{% return empty_analytics_chart %}

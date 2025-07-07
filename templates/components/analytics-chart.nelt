@@ -1,0 +1,41 @@
+{% local nelt = require "...vendor.nelt.nelt" %}
+{% local http = require "...vendor.http-nelua.http" %}
+{% local norm = require "...vendor.norm.norm" %}
+
+{% local function analytics_chart(tp: *nelt.Template, self: *http.Server) %}
+  <div id="analytics">
+    <canvas id="analytics-chart"></canvas>
+    <script>
+      const ctx = document.getElementById("analytics-chart")
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            /* beautify ignore:start */
+              {# TODO: I plant to order the transactions by date #}
+              {# If that is the case, I will need to filter the transactions by week, month and year #}
+              {# I think a bar chart of either day(mon-fri), month(jan-dec), year(2025-) will work fine #}
+              {# The particular time frame should be controlled by a select at the top level of the div #}
+              {# and submitted either on select or a specific sort button #}
+              /* beautify ignore:end */
+          ],
+          datasets: [{
+            label: "Income",
+            data: [
+              /* beautify ignore:start */
+                /* beautify ignore:end */
+            ]
+          }, {
+            label: "Expenses",
+            data: [
+              /* beautify ignore:start */
+                /* beautify ignore:end */
+            ]
+          }]
+        }
+      })
+    </script>
+  </div>
+{% end %}
+
+{% return analytics_chart %}
