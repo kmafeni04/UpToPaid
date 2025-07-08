@@ -63,7 +63,7 @@
 
           }
 
-          @media(max-height: 600px) {
+          @media xs- {
             me {
               display: grid;
               grid-template-columns: repeat(auto-fit, minmax(25svh, 1fr));

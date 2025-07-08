@@ -12,7 +12,7 @@
         height: 100svh;
       }
 
-      @media(max-width: 768px) {
+      @media sm- {
         me {
           flex-direction: column;
         }
@@ -83,7 +83,7 @@
           justify-content: center;
         }
 
-        @media(max-width: 768px) {
+        @media sm- {
           me {
             display: none;
           }
@@ -179,7 +179,7 @@
 
         }
 
-        @media(max-width: 768px) {
+        @media sm- {
           me {
             width: 100%;
             display: flex;

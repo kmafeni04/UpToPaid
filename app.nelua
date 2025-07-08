@@ -181,6 +181,47 @@ app:delete("transaction", "/transactions/:id", function(self: *http.Server): htt
   return transactions_controller.transaction_delete(self, Transactions)
 end)
 
+app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): http.Response
+  local current_user_id = self.session:get_val("current_user_id")
+  if current_user_id == "" then
+    print("Failed to determine current_user")
+    return self:error()
+  end
+
+  local transactions, err = Transactions:select(inline_map!(string, string, {
+    user_id = current_user_id
+  }))
+  if err ~= "" then
+    print(err)
+    return self:error()
+  end
+
+  local sseg, err = datastar.ServerSentEventGenerator.new(self)
+  if err ~= "" then
+    print(err)
+    return self:error()
+  end
+
+  sseg:patch_elements('<div id="analytics"></div>')
+  local sort: string
+  local signals, err = datastar.read_signals(self)
+  if err == "" then
+    local obj = signals:get_obj()
+    if obj:has("sort") then
+      sort = obj["sort"]:get_str()
+    end
+  end
+  sort = sort ~= "" and sort or "day"
+
+  local analytics_chart = require ".templates.components.analytics-chart-nelt" 
+
+  local tp: nelt.Template
+  analytics_chart(&tp, self, sort)
+  sseg:patch_elements(tp:tostring())
+
+  return sseg.resp
+end)
+
 app:get("goals", "/home/goals", function(self: *http.Server): http.Response
   if self.session:get_val("current_user") == "" then
     return self:redirect(self:url_for("login"))

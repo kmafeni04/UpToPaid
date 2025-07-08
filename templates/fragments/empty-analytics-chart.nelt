@@ -12,6 +12,8 @@
 
         & p {
           font-size: var(--font-md);
+          font-weight: 700;
+          text-align: center;
         }
       }
     </style>

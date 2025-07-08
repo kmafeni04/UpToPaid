@@ -91,7 +91,7 @@
           }
         }
 
-        @media(max-width: 768px) {
+        @media sm- {
           me button span:first-child {
             display: none;
           }
@@ -122,14 +122,42 @@
         border-radius: var(--radius-md);
         box-shadow: var(--box-shadow);
 
-        & p {
-          font-weight: 700;
-        }
       }
     </style>
-    <p>Analytics</p>
+    <div>
+      <style>
+        me {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          & p {
+            font-weight: 700;
+          }
+        }
+
+        @media sm- {
+          me button span:first-child {
+            display: none;
+          }
+        }
+      </style>
+      <p>Analytics</p>
+      <select name="sort"
+              id="sort"
+              class="btn"
+              data-signals-sort=""
+              data-bind-sort
+              data-on-change="@get('{{ self:url_for("analytics_chart") }}')">
+        <option value="day">Day</option>
+        <option value="week">Week</option>
+        <option value="month">Month</option>
+        <option value="year">Year</option>
+      </select>
+    </div>
     {% if #transactions ~= 0 then %}
-      {% analytics_chart(tp, self) %}
+      <div id="analytics"
+           data-effect="@get('{{ self:url_for("analytics_chart") }}')"></div>
     {% else %}
     {% empty_analytics_chart(tp) %}
     {% end %}

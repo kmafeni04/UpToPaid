@@ -32,7 +32,7 @@
         }
       }
 
-      @media(max-width: 768px) {
+      @media md- {
         me {
           & thead {
             display: none;

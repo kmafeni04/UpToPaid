@@ -2,38 +2,79 @@
 {% local http = require "...vendor.http-nelua.http" %}
 {% local norm = require "...vendor.norm.norm" %}
 
-{% local function analytics_chart(tp: *nelt.Template, self: *http.Server) %}
+{% local function analytics_chart(tp: *nelt.Template, self: *http.Server, sort: string) %}
   <div id="analytics">
-    <canvas id="analytics-chart"></canvas>
+    {{ sort }}
+    <canvas id="analytics-chart" width="1600" height="900"></canvas>
     <script>
-      const ctx = document.getElementById("analytics-chart")
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: [
-            /* beautify ignore:start */
-              {# TODO: I plant to order the transactions by date #}
-              {# If that is the case, I will need to filter the transactions by week, month and year #}
-              {# I think a bar chart of either day(mon-fri), month(jan-dec), year(2025-) will work fine #}
-              {# The particular time frame should be controlled by a select at the top level of the div #}
-              {# and submitted either on select or a specific sort button #}
-              /* beautify ignore:end */
-          ],
-          datasets: [{
-            label: "Income",
-            data: [
-              /* beautify ignore:start */
-                /* beautify ignore:end */
-            ]
-          }, {
-            label: "Expenses",
-            data: [
-              /* beautify ignore:start */
-                /* beautify ignore:end */
-            ]
-          }]
+      try {
+        Chart.getChart('analytics-chart').destroy();
+      } catch {
+        // TODO: Inline this function
+        function getCurrentWeekOfMonth() {
+          const today = new Date(); // Get the current date
+          const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // First day of the month
+
+          const dayOfMonth = today.getDate(); // Current day of the month
+          const daysDifference = dayOfMonth - 1; // Subtract 1 to get zero-based index
+          const currentWeek = Math.ceil((daysDifference + firstDayOfMonth.getDay() + 1) / 7);
+
+          return currentWeek;
         }
-      })
+
+
+        const date = new Date()
+        const dayOfWeek = date.getDay()
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const day = days[dayOfWeek]
+        const monthOfYear = date.getMonth() // Note: January is 0, December is 11
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const month = months[monthOfYear]
+        const year = date.getFullYear()
+        const nextMonth = new Date(year, monthOfYear + 1, 0) // 0 gets the last day of the previous month
+        const totalDays = nextMonth.getDate()
+
+        const sort = "{{ sort }}"
+
+        let labels = []
+
+        if (sort === "day") {
+          labels.push(day)
+        } else if (sort === "week") {
+          labels = days
+        } else if (sort === "month") {
+          labels = [1, 2, 3, 4]
+        } else if (sort === "year") {
+          labels = months
+        }
+        const ctx = document.getElementById("analytics-chart")
+        const chart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            /* beautify ignore:start */
+            {# TODO: I plant to order the transactions by date #}
+            {# If that is the case, I will need to filter the transactions by week, month and year #}
+            {# I think a bar chart of either day(mon-fri), month(jan-dec), year(2025-) will work fine #}
+            {# The particular time frame should be controlled by a select at the top level of the div #}
+            {# and submitted either on select or a specific sort button #}
+            /* beautify ignore:end */
+            labels: labels,
+            datasets: [{
+              label: "Income",
+              data: [
+                /* beautify ignore:start */
+                /* beautify ignore:end */
+              ]
+            }, {
+              label: "Expenses",
+              data: [
+                /* beautify ignore:start */
+                /* beautify ignore:end */
+              ]
+            }]
+          },
+        })
+      }
     </script>
   </div>
 {% end %}
