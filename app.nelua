@@ -153,7 +153,8 @@ app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Respo
     user_id = current_user_id
   }))
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
   tp.data = &transactions
   dashboard(&tp, self)

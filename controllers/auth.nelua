@@ -36,18 +36,21 @@ function auth_controller.login_post(self: *http.Server, Users: norm.Model)
   end
   local user, err = Users:find(inline_map!(string, string, { username = username }))
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
   if not next(user.row) then
     errors:push("Username does not exist")
   else
     local stored_password_hash, err = user:get_col("password")
     if err ~= "" then
-      return self:error(err)
+      print(err)
+      return self:error()
     end
     local ok, err = bcrypt.verify(password, stored_password_hash)
     if err ~= "" then
-      return self:error(err)
+      print(err)
+      return self:error()
     end
     if not ok then
       errors:push("Incorrect password")
@@ -94,7 +97,8 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
       username = username
     }))
     if err ~= "" then
-      return self:error(err)
+      print(err)
+      return self:error()
     end
     if next(user.row) then
       errors:push("Username already exists")
@@ -111,7 +115,8 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
       email = email
     }))
     if err ~= "" then
-      return self:error(err)
+      print(err)
+      return self:error()
     end
     if next(user.row) then
       errors:push("Email already exists")
@@ -142,7 +147,8 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
     password = bcrypt.encrypt(password),
   }))
   if err ~= "" then
-    return self:error(err)
+      print(err)
+      return self:error()
   end
   self.session:set_val("current_user", username)
   self.session:set_val("current_user_id", user:get_col("id"))
@@ -152,15 +158,18 @@ end
 function auth_controller.logout(self: *http.Server)
   local err = self.session:set_val("current_user", "") 
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
   local err = self.session:set_val("current_user_id", "")
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
   sseg:redirect(self:url_for("index"))
   return sseg.resp

@@ -1,3 +1,5 @@
+-- TODO: Abstract repetive patch_elements calls into single function
+
 local http = require "..vendor.http-nelua.http"
 local datastar = require "..vendor.http-nelua.extras.datastar.datastar"
 local norm = require "..vendor.norm.norm"
@@ -15,7 +17,8 @@ local transactions_controller = @record{}
 function transactions_controller.new_transaction(self: *http.Server)
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local tp: nelt.Template
@@ -70,12 +73,14 @@ end
 function transactions_controller.transactions_post(self: *http.Server, Transactions: norm.Model)
   local current_user_id = self.session:get_val("current_user_id")
   if current_user_id == "" then
-    return self:error("Failed to determine current_user")
+    print("Failed to determine current_user")
+    return self:error()
   end
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local errors, date, name, amount, type, description = validate_transactions_form(self)
@@ -124,9 +129,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
   transactions_table(&tp, self)
   sseg:patch_elements(tp:tostring())
 
-  local tp: nelt.Template
-  analytics_chart(&tp, self)
-  sseg:patch_elements(tp:tostring())
+  sseg:patch_elements(([[<div id="analytics" data-effect="@get('%s')"></div>]]):format(self:url_for("analytics_chart")))
 
   sseg:patch_signals((
     [[{ "transaction_income": %s, "transaction_expenses": %s }]]
@@ -137,19 +140,22 @@ end
 function transactions_controller.update_transaction(self: *http.Server, Transactions: norm.Model)
   local id = self.req.params["id"]
   if id == "" then
-    return self:error("Transaction ID was an empty string")
+    print("Transaction ID was an empty string")
+    return self:error()
   end
 
   local transaction, err = Transactions:find(inline_map!(string, string, {
     id = id
   }))
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local date = transaction:get_col("date")
@@ -172,12 +178,14 @@ end
 function transactions_controller.transaction_put(self: *http.Server, Transactions: norm.Model)
   local current_user_id = self.session:get_val("current_user_id")
   if current_user_id == "" then
-    return self:error("Failed to determine current_user")
+    print("Failed to determine current_user")
+    return self:error()
   end
 
   local id = self.req.params["id"]
   if id == "" then
-    return self:error("Transaction ID was an empty string")
+    print("Transaction ID was an empty string")
+    return self:error()
   end
 
   local transaction, err = Transactions:find(inline_map!(string, string, {
@@ -185,12 +193,14 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
     user_id = current_user_id
   }))
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local errors, date, name, amount, type, description = validate_transactions_form(self)
@@ -238,10 +248,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
   transactions_table(&tp, self)
   sseg:patch_elements(tp:tostring())
 
-  local tp: nelt.Template
-  tp.data = &transactions
-  analytics_chart(&tp, self)
-  sseg:patch_elements(tp:tostring())
+  sseg:patch_elements(([[<div id="analytics" data-effect="@get('%s')"></div>]]):format(self:url_for("analytics_chart")))
 
   sseg:patch_signals((
     [[{ "transaction_income": %s, "transaction_expenses": %s }]]
@@ -252,7 +259,8 @@ end
 function transactions_controller.transaction_delete(self: *http.Server, Transactions: norm.Model)
   local current_user_id = self.session:get_val("current_user_id")
   if current_user_id == "" then
-    return self:error("Failed to determine current_user")
+    print("Failed to determine current_user")
+    return self:error()
   end
 
   local id = self.req.params["id"]
@@ -265,19 +273,22 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     user_id = current_user_id
   }))
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local err = transaction:delete()
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
   }))
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   local transaction_income: number
@@ -294,7 +305,8 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    return self:error(err)
+    print(err)
+    return self:error()
   end
 
   if #transactions > 0 then
@@ -303,10 +315,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     transactions_table(&tp, self)
     sseg:patch_elements(tp:tostring())
 
-    local tp: nelt.Template
-    tp.data = &transactions
-    analytics_chart(&tp, self)
-    sseg:patch_elements(tp:tostring())
+    sseg:patch_elements(([[<div id="analytics" data-effect="@get('%s')"></div>]]):format(self:url_for("analytics_chart")))
   else
     local tp: nelt.Template
     empty_transactions_table(&tp, self)
