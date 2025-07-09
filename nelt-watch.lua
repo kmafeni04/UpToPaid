@@ -8,4 +8,5 @@ luamon(nil, function(file_path)
   end
 end, {
   include_file_types = { "nelt" },
+  delay = 0,
 })

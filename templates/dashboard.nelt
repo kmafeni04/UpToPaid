@@ -9,7 +9,6 @@
 {% local home = require ".components.home-nelt" %}
 {% local transactions_table = require ".components.transactions-table-nelt" %}
 {% local transaction_form = require ".components.transaction-form-nelt" %}
-{% local analytics_chart = require ".components.analytics-chart-nelt" %}
 
 {% local empty_transactions_table = require ".fragments.empty-transactions-table-nelt" %}
 {% local empty_analytics_chart = require ".fragments.empty-analytics-chart-nelt" %}
@@ -122,6 +121,11 @@
         border-radius: var(--radius-md);
         box-shadow: var(--box-shadow);
 
+        & #analytics {
+          min-height: 20rem;
+          height: 60svw;
+          max-height: 30rem;
+        }
       }
     </style>
     <div>
@@ -134,6 +138,7 @@
           & p {
             font-weight: 700;
           }
+
         }
 
         @media sm- {

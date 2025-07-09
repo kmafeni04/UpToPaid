@@ -2,27 +2,37 @@
 {% local http = require "...vendor.http-nelua.http" %}
 {% local norm = require "...vendor.norm.norm" %}
 
-{% local function analytics_chart(tp: *nelt.Template, self: *http.Server, sort: string) %}
+{% local function analytics_chart(tp: *nelt.Template, self: *http.Server, sort: string, transactions: sequence(norm.Model.Inst)) %}
+  {% local T = @record{ date: string, amount: string} %}
+  {% local income_transactions: sequence(T) %}
+  {% local expense_transactions: sequence(T) %}
+  {% for _, transaction in ipairs(transactions) do %}
+    {% local t: T = { transaction:get_col("date"), transaction:get_col("amount") } %}
+    {% if transaction:get_col("type") == "Income" then %}
+      {% income_transactions:push(t) %}
+    {% elseif transaction:get_col("type") == "Expense" then %}
+      {% expense_transactions:push(t) %}
+    {% end %}
+  {% end %}
   <div id="analytics">
-    {{ sort }}
-    <canvas id="analytics-chart" width="1600" height="900"></canvas>
+    <canvas id="analytics-chart"></canvas>
+    <script>
+      // TODO: Inline this function
+      function getCurrentWeekOfMonth() {
+        const today = new Date(); // Get the current date
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // First day of the month
+
+        const dayOfMonth = today.getDate(); // Current day of the month
+        const daysDifference = dayOfMonth - 1; // Subtract 1 to get zero-based index
+        const currentWeek = Math.ceil((daysDifference + firstDayOfMonth.getDay() + 1) / 7);
+
+        return currentWeek;
+      }
+    </script>
     <script>
       try {
-        Chart.getChart('analytics-chart').destroy();
+        throw new Error() // Only way I could figure out to re-render the graph
       } catch {
-        // TODO: Inline this function
-        function getCurrentWeekOfMonth() {
-          const today = new Date(); // Get the current date
-          const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // First day of the month
-
-          const dayOfMonth = today.getDate(); // Current day of the month
-          const daysDifference = dayOfMonth - 1; // Subtract 1 to get zero-based index
-          const currentWeek = Math.ceil((daysDifference + firstDayOfMonth.getDay() + 1) / 7);
-
-          return currentWeek;
-        }
-
-
         const date = new Date()
         const dayOfWeek = date.getDay()
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -34,49 +44,73 @@
         const nextMonth = new Date(year, monthOfYear + 1, 0) // 0 gets the last day of the previous month
         const totalDays = nextMonth.getDate()
 
-        const sort = "{{ sort }}"
+        /* beautify ignore:start */
+        {% if sort == "day" then %}
+        {% local income_sb: stringbuilder %}
+        {% local expense_sb: stringbuilder %}
+        {% if #income_transactions > 0 then%}
+          {% for _, t in ipairs(income_transactions) do %}
+            {% income_sb:writef("%s +", t.amount) %}
+          {% end %}
+          {% income_sb:rollback(1) %}
+        {% end %}
+        {% if #expense_transactions > 0 then%}
+          {% for _, t in ipairs(expense_transactions) do %}
+            {% expense_sb:writef("%s +", t.amount) %}
+          {% end %}
+          {% expense_sb:rollback(1) %}
+        {% end %}
+        {% local income_str = income_sb:promote() %}
+        {% local expense_str = expense_sb:promote() %}
+        let totalIncome = {{ income_str ~= "" and income_str or "0" }};
+        let totalExpense = {{ expense_str ~= "" and expense_str or "0" }};
+        /* beautify ignore:end */
+        let labels = [day]
+        let incomeData = [totalIncome]
+        let expenseData = [totalExpense]
+        /* beautify ignore:start */
+        {% elseif sort == "week" then %}
+        /* beautify ignore:end */
+        let labels = days
+        let incomeData = []
+        let expenseData = []
+        /* beautify ignore:start */
+        {% elseif sort == "month" then %}
+        /* beautify ignore:end */
+        let labels = [1, 2, 3, 4]
+        let incomeData = []
+        let expenseData = []
+        /* beautify ignore:start */
+        {% elseif sort == "year" then %}
+        /* beautify ignore:end */
+        let labels = months
+        let incomeData = []
+        let expenseData = []
+        /* beautify ignore:start */
+        {% end %}
+        /* beautify ignore:end */
 
-        let labels = []
-
-        if (sort === "day") {
-          labels.push(day)
-        } else if (sort === "week") {
-          labels = days
-        } else if (sort === "month") {
-          labels = [1, 2, 3, 4]
-        } else if (sort === "year") {
-          labels = months
-        }
         const ctx = document.getElementById("analytics-chart")
         const chart = new Chart(ctx, {
           type: "bar",
           data: {
-            /* beautify ignore:start */
-            {# TODO: I plant to order the transactions by date #}
-            {# If that is the case, I will need to filter the transactions by week, month and year #}
-            {# I think a bar chart of either day(mon-fri), month(jan-dec), year(2025-) will work fine #}
-            {# The particular time frame should be controlled by a select at the top level of the div #}
-            {# and submitted either on select or a specific sort button #}
-            /* beautify ignore:end */
             labels: labels,
             datasets: [{
               label: "Income",
-              data: [
-                /* beautify ignore:start */
-                /* beautify ignore:end */
-              ]
+              data: incomeData
             }, {
               label: "Expenses",
-              data: [
-                /* beautify ignore:start */
-                /* beautify ignore:end */
-              ]
+              data: expenseData
             }]
           },
+          options: {
+            maintainAspectRatio: false
+          }
         })
       }
+      /* beautify ignore:start */
+      /* beautify ignore:end */
     </script>
   </div>
 {% end %}
-
 {% return analytics_chart %}

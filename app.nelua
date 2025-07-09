@@ -43,7 +43,7 @@ local err = norm.migrate(db, inline_map!(string, norm.Schema.MigrationFn, {
       { "username", type.text, { unique = true } },
       { "email",    type.text, { unique = true } },
       { "password", type.text }
-    }, "", { strict = true })
+    }, { strict = true })
     return err
   end,
 
@@ -65,7 +65,7 @@ local err = norm.migrate(db, inline_map!(string, norm.Schema.MigrationFn, {
 			{ "type",        type.text },
 			{ "description", type.text },
 			{ "user_id",     type.integer },
-    }, "", { strict = true })
+    }, { strict = true })
     return err
   end
 }))
@@ -151,7 +151,7 @@ app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Respo
   local tp: nelt.Template
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }))
+  }), { extra_sql = "ORDER BY date DESC" })
   if err ~= "" then
     print(err)
     return self:error()
@@ -215,8 +215,27 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
 
   local analytics_chart = require ".templates.components.analytics-chart-nelt" 
 
+  local date = os.date("!%Y-%m-%d")
+
+  local transactions: sequence(norm.Model.Inst)
+  local err: string
+
+  if sort == "day" then
+    transactions, err = Transactions:select(("user_id = %s AND date = %s ORDER BY date asc"):format(norm.escape_literal(current_user_id), norm.escape_literal(date)))
+  elseif sort == "week" then
+    transactions, err = Transactions:select(("user_id = %s AND strftime('%%Y-%%W', date) = strftime('%%Y-%%W', %s) ORDER BY date asc"):format(
+      norm.escape_literal(current_user_id),
+      norm.escape_literal(date)
+    )) -- sqlite specific
+  end
+
+  if err ~= "" then
+    print(err)
+    return self:error()
+  end
+
   local tp: nelt.Template
-  analytics_chart(&tp, self, sort)
+  analytics_chart(&tp, self, sort, transactions)
   sseg:patch_elements(tp:tostring())
 
   return sseg.resp

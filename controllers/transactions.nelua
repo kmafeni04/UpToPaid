@@ -104,7 +104,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
 
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }))
+  }), { extra_sql = "ORDER BY date DESC"})
   if err ~= "" then
     sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
@@ -223,7 +223,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
 
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }))
+  }), { extra_sql = "ORDER BY date DESC"})
   if err ~= "" then
     sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
@@ -285,7 +285,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
 
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }))
+  }), { extra_sql = "ORDER BY date DESC"})
   if err ~= "" then
     print(err)
     return self:error()
