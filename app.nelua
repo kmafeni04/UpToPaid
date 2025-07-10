@@ -215,18 +215,63 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
 
   local analytics_chart = require ".templates.components.analytics-chart-nelt" 
 
+  local function day_of_week(date: string)
+    local matched, match_seq = date:match("(%d+)-(%d+)-(%d+)")
+  
+    local year = tonumber(match_seq[1])
+    local month = tonumber(match_seq[2])
+    local day = tonumber(match_seq[3])
+
+    local timeInSeconds = os.time({
+      year = year,
+      month = month,
+      day = day,
+      hour = 0,
+      min = 0,
+      sec = 0,
+      isdst = false -- Daylight saving time
+    })
+
+    local day = os.date("%A", timeInSeconds)
+    return day
+  end
+
   local date = os.date("!%Y-%m-%d")
 
   local transactions: sequence(norm.Model.Inst)
   local err: string
+  local labels = "[]"
+  local income_data = "[]"
+  local expense_data = "[]"
 
   if sort == "day" then
-    transactions, err = Transactions:select(("user_id = %s AND date = %s ORDER BY date asc"):format(norm.escape_literal(current_user_id), norm.escape_literal(date)))
-  elseif sort == "week" then
-    transactions, err = Transactions:select(("user_id = %s AND strftime('%%Y-%%W', date) = strftime('%%Y-%%W', %s) ORDER BY date asc"):format(
+    transactions, err = Transactions:select(("user_id = %s AND date = %s ORDER BY date asc"):format(
       norm.escape_literal(current_user_id),
       norm.escape_literal(date)
-    )) -- sqlite specific
+    ))
+    labels = '["' .. day_of_week(date) .. '"]'
+
+    local income_transactions: sequence(string)
+    local expense_transactions: sequence(string)
+
+    for i, transaction in ipairs(transactions) do
+      if transaction:get_col("type") == "Income" then
+        income_transactions:push(transaction:get_col("amount"))
+      end
+      if transaction:get_col("type") == "Expense" then
+        expense_transactions:push(transaction:get_col("amount"))
+      end
+    end
+
+    income_data = "[" .. string.concat(income_transactions, "+") .. "]"
+    expense_data = "[" .. string.concat(expense_transactions, "+") .. "]"
+  elseif sort == "week" then
+    transactions, err = Transactions:select(
+      ("user_id = %s AND strftime('%%Y-%%W', date) = strftime('%%Y-%%W', %s) ORDER BY date asc"):format(
+        norm.escape_literal(current_user_id),
+        norm.escape_literal(date)
+      )
+    ) -- sqlite specific
   end
 
   if err ~= "" then
@@ -235,7 +280,7 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
   end
 
   local tp: nelt.Template
-  analytics_chart(&tp, self, sort, transactions)
+  analytics_chart(&tp, self, labels, income_data, expense_data)
   sseg:patch_elements(tp:tostring())
 
   return sseg.resp
