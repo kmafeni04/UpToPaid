@@ -101,9 +101,11 @@
         </div>
         <div class="transaction-form-input">
           <label for="type">Type:</label>
-          <select id="type" name="type" class="btn"  value="{{ type }}" required>
-            <option value="Income">Income</option>
-            <option value="Expense">Expense</option>
+          <select id="type" name="type" class="btn"  required>
+            <option value="Income" {{ type == "Income" and "selected" or "" }}>Income
+            </option>
+            <option value="Expense" {{ type == "Expense" and "selected" or "" }}>Expense
+            </option>
           </select>
         </div>
         <div class="transaction-form-input">

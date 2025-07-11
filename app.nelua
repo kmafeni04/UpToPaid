@@ -218,22 +218,37 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
 
   local time = os.time()
 
-  local transactions: sequence(norm.Model.Inst)
-  local err: string
-  local labels = "[]"
-  local income_data = "[]"
-  local expense_data = "[]"
-
   local function is_same_day(t1: integer, t2: integer): boolean
     local date1 = os.date("%Y-%m-%d", t1)
     local date2 = os.date("%Y-%m-%d", t2)
     return date1 == date2
   end
 
+  local function is_same_week(t1: integer, t2: integer)
+    local function get_week_and_year(t: integer) <inline>
+      local week = os.date("%V", t)
+      local year = os.date("%Y", t)
+      local day = os.date("%A", t)
+      if day == "Sunday" then
+        week = tostring(tointeger(week) + 1)
+      end
+      return week, year
+    end
+
+    local week1, year1 = get_week_and_year(t1)
+    local week2, year2 = get_week_and_year(t2)
+    return week1 == week2 and year1 == year2
+  end
+
+  local transactions, err = Transactions:select(inline_map!(string, string,{
+    user_id = norm.escape_literal(current_user_id)
+  }))
+
+  local labels = "[]"
+  local income_data = "[]"
+  local expense_data = "[]"
+
   if sort == "day" then
-    transactions, err = Transactions:select(inline_map!(string, string,{
-      user_id = norm.escape_literal(current_user_id)
-    }))
     labels = '["' .. os.date("%A", time) .. '"]'
 
     local income_transactions: sequence(string)
@@ -242,11 +257,12 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
     for i, transaction in ipairs(transactions) do
       local transaction_time = transaction:get_col("time")
       if is_same_day(tointeger(transaction_time), time) then
+        local amount = transaction:get_col("amount")
         if transaction:get_col("type") == "Income" then
-          income_transactions:push(transaction:get_col("amount"))
+          income_transactions:push(amount)
         end
         if transaction:get_col("type") == "Expense" then
-          expense_transactions:push(transaction:get_col("amount"))
+          expense_transactions:push(amount)
         end
       end
     end
@@ -254,9 +270,59 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
     income_data = "[" .. string.concat(income_transactions, "+") .. "]"
     expense_data = "[" .. string.concat(expense_transactions, "+") .. "]"
   elseif sort == "week" then
+    ## local days = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" }
+    local days: [7]string = #[days]#
+    labels = '["' .. string.concat(days, '", "') .. '"]'
+    local same_week_transactions: sequence(norm.Model.Inst)
+    for _, transaction in ipairs(transactions) do
+      local transaction_time = transaction:get_col("time")
+      if is_same_week(tointeger(transaction_time), time) then
+        same_week_transactions:push(transaction)
+      end
+    end
+    ## for _, day in ipairs(days) do
+      local #|day .. "_income_transactions"|#: sequence(string)
+      local #|day .. "_expense_transactions"|#: sequence(string)
+    ## end
+    for i, transaction in ipairs(same_week_transactions) do
+      local transaction_time = transaction:get_col("time")
+      local day = os.date("%A", tointeger(transaction_time))
+      local amount = transaction:get_col("amount")
+      ## for _, day in ipairs(days) do
+        if day == #[day]# then
+          if transaction:get_col("type") == "Income" then
+            #|day .. "_income_transactions"|#:push(amount)
+          end
+          if transaction:get_col("type") == "Expense" then
+            #|day .. "_expense_transactions"|#:push(amount)
+          end
+        end
+      ## end
+    end
+    local income_sb: stringbuilder
+    local expense_sb: stringbuilder
+
+    income_sb:write("[")
+    expense_sb:write("[")
+    ## for _, day in ipairs(days) do
+      local #|day .. "_income_data"|# = string.concat(#|day .. "_income_transactions"|#, ' + ')
+      local #|day .. "_expense_data"|# = string.concat(#|day .. "_expense_transactions"|#, ' + ')
+      #|day .. "_income_data"|# = #|day .. "_income_data"|# ~= "" and #|day .. "_income_data"|# or  "0" 
+      #|day .. "_expense_data"|# = #|day .. "_expense_data"|# ~= "" and #|day .. "_expense_data"|# or  "0" 
+      income_sb:writef("%s ,", #|day .. "_income_data"|#)
+      expense_sb:writef("%s ,", #|day .. "_expense_data"|#)
+    ## end
+    income_sb:rollback(1)
+    expense_sb:rollback(1)
+
+    income_sb:write("]")
+    expense_sb:write("]")
+
+    income_data = income_sb:promote()
+    expense_data = expense_sb:promote()
   end
 
-  if #transactions == 0 then
+  if income_data == "[]" and expense_data == "[]" then
     local tp: nelt.Template
     empty_analytics_chart(&tp)
     sseg:patch_elements(tp:tostring())
