@@ -10,9 +10,25 @@ local transactions_table = require "..templates.components.transactions-table-ne
 local analytics_chart = require "..templates.components.analytics-chart-nelt"
 
 local empty_transactions_table = require "..templates.fragments.empty-transactions-table-nelt"
-local empty_analytics_chart= require "..templates.fragments.empty-analytics-chart-nelt"
+local empty_analytics_chart = require "..templates.fragments.empty-analytics-chart-nelt"
 
 local transactions_controller = @record{}
+
+local function date_to_time(date: string)
+  local matched, match_seq = date:match("(%d+)-(%d+)-(%d+)")
+
+  local year = tonumber(match_seq[1])
+  local month = tonumber(match_seq[2])
+  local day = tonumber(match_seq[3])
+
+  local time = os.time({
+    year = year,
+    month = month,
+    day = day,
+  })
+
+  return time
+end
 
 function transactions_controller.new_transaction(self: *http.Server)
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
@@ -22,7 +38,7 @@ function transactions_controller.new_transaction(self: *http.Server)
   end
 
   local tp: nelt.Template
-  transaction_form(&tp,"@post('" .. self:url_for("transactions") .. "', { contentType: 'form' })",  os.date("!%Y-%m-%d"))
+  transaction_form(&tp,"@post('" .. self:url_for("transactions") .. "', { contentType: 'form' })",  os.time())
   sseg:patch_elements(tp:tostring(), {
     selector = "body",
     mode = datastar.ElementPatchMode.Append
@@ -90,7 +106,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
   end
 
   local transaction, err = Transactions:create(inline_map!(string, string, {
-		date = date,
+		time = tostring(date_to_time(date)),
 		name = name,
 		amount = amount,
 		type = type,
@@ -104,7 +120,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
 
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }), { extra_sql = "ORDER BY date DESC"})
+  }), { extra_sql = "ORDER BY time DESC"})
   if err ~= "" then
     sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
@@ -127,7 +143,9 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
   local tp: nelt.Template
   tp.data = &transactions
   transactions_table(&tp, self)
-  sseg:patch_elements(tp:tostring())
+  sseg:patch_elements(tp:tostring(), {
+    mode = datastar.ElementPatchMode.Replace
+  })
 
   sseg:patch_elements(([[<div id="analytics" data-effect="@get('%s')"></div>]]):format(self:url_for("analytics_chart")))
 
@@ -158,7 +176,7 @@ function transactions_controller.update_transaction(self: *http.Server, Transact
     return self:error()
   end
 
-  local date = transaction:get_col("date")
+  local time = transaction:get_col("time")
   local name = transaction:get_col("name")
   local amount = transaction:get_col("amount")
   local type = transaction:get_col("type")
@@ -166,7 +184,7 @@ function transactions_controller.update_transaction(self: *http.Server, Transact
 
 
   local tp: nelt.Template
-  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = inline_map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", date, name, amount, type, description)
+  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = inline_map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", tointeger(time), name, amount, type, description)
   sseg:patch_elements(tp:tostring(), {
     selector = "body",
     mode = datastar.ElementPatchMode.Append
@@ -210,7 +228,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
   end
 
   local transaction, err = transaction:update(inline_map!(string, string, {
-		date = date,
+		time = tostring(date_to_time(date)),
 		name = name,
 		amount = amount,
 		type = type,
@@ -223,7 +241,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
 
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }), { extra_sql = "ORDER BY date DESC"})
+  }), { extra_sql = "ORDER BY time DESC"})
   if err ~= "" then
     sseg:patch_elements('<ul id="errors"><li>Internal error occured</li></ul>')
     return sseg.resp
@@ -246,7 +264,9 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
   local tp: nelt.Template
   tp.data = &transactions
   transactions_table(&tp, self)
-  sseg:patch_elements(tp:tostring())
+  sseg:patch_elements(tp:tostring(), {
+    mode = datastar.ElementPatchMode.Replace
+  })
 
   sseg:patch_elements(([[<div id="analytics" data-effect="@get('%s')"></div>]]):format(self:url_for("analytics_chart")))
 
@@ -285,7 +305,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
 
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }), { extra_sql = "ORDER BY date DESC"})
+  }), { extra_sql = "ORDER BY time DESC"})
   if err ~= "" then
     print(err)
     return self:error()
@@ -313,7 +333,9 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     local tp: nelt.Template
     tp.data = &transactions
     transactions_table(&tp, self)
-    sseg:patch_elements(tp:tostring())
+    sseg:patch_elements(tp:tostring(), {
+      mode = datastar.ElementPatchMode.Replace
+    })
 
     sseg:patch_elements(([[<div id="analytics" data-effect="@get('%s')"></div>]]):format(self:url_for("analytics_chart")))
   else

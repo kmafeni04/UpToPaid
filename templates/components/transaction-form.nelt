@@ -1,6 +1,6 @@
 {% local nelt = require "...vendor.nelt.nelt" %}
 
-{% local function transaction_form(tp: *nelt.Template, action: string, date: string, name: string, amount: string, type: string, description: string) %}
+{% local function transaction_form(tp: *nelt.Template, action: string, time: integer, name: string, amount: string, type: string, description: string) %}
   <div id="transaction_form_popup">
     <style>
       me {
@@ -75,7 +75,7 @@
                  id="date"
                  name="date"
                  class="input"
-                 value="{{ date }}"
+                 data-attr-value="const date = new Date({{ time }} * 1000); const day = ('0' + date.getDate()).slice(-2); const month = ('0' + (date.getMonth() + 1)).slice(-2); date.getFullYear()+'-'+(month)+'-'+(day) ;"
                  required />
         </div>
         <div class="transaction-form-input">

@@ -59,7 +59,7 @@ local err = norm.migrate(db, inline_map!(string, norm.Schema.MigrationFn, {
   ["1750890982"] = function(db: norm.Db): string
     local err = schema.create_table(db, "transactions", {
 			{ "id",          type.integer, { primary_key = true } },
-			{ "date",        type.text },
+			{ "time",        type.integer },
 			{ "name",        type.text },
 			{ "amount",      type.real },
 			{ "type",        type.text },
@@ -151,7 +151,7 @@ app:get("dashboard", "/home/dashboard", function(self: *http.Server): http.Respo
   local tp: nelt.Template
   local transactions, err = Transactions:select(inline_map!(string, string, {
     user_id = current_user_id
-  }), { extra_sql = "ORDER BY date DESC" })
+  }), { extra_sql = "ORDER BY time DESC" })
   if err ~= "" then
     print(err)
     return self:error()
@@ -214,29 +214,9 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
   sort = sort ~= "" and sort or "day"
 
   local analytics_chart = require ".templates.components.analytics-chart-nelt" 
+  local empty_analytics_chart = require ".templates.fragments.empty-analytics-chart-nelt"
 
-  local function day_of_week(date: string)
-    local matched, match_seq = date:match("(%d+)-(%d+)-(%d+)")
-  
-    local year = tonumber(match_seq[1])
-    local month = tonumber(match_seq[2])
-    local day = tonumber(match_seq[3])
-
-    local timeInSeconds = os.time({
-      year = year,
-      month = month,
-      day = day,
-      hour = 0,
-      min = 0,
-      sec = 0,
-      isdst = false -- Daylight saving time
-    })
-
-    local day = os.date("%A", timeInSeconds)
-    return day
-  end
-
-  local date = os.date("!%Y-%m-%d")
+  local time = os.time()
 
   local transactions: sequence(norm.Model.Inst)
   local err: string
@@ -244,34 +224,43 @@ app:get("analytics_chart", "/analytics-chart", function(self: *http.Server): htt
   local income_data = "[]"
   local expense_data = "[]"
 
+  local function is_same_day(t1: integer, t2: integer): boolean
+    local date1 = os.date("%Y-%m-%d", t1)
+    local date2 = os.date("%Y-%m-%d", t2)
+    return date1 == date2
+  end
+
   if sort == "day" then
-    transactions, err = Transactions:select(("user_id = %s AND date = %s ORDER BY date asc"):format(
-      norm.escape_literal(current_user_id),
-      norm.escape_literal(date)
-    ))
-    labels = '["' .. day_of_week(date) .. '"]'
+    transactions, err = Transactions:select(inline_map!(string, string,{
+      user_id = norm.escape_literal(current_user_id)
+    }))
+    labels = '["' .. os.date("%A", time) .. '"]'
 
     local income_transactions: sequence(string)
     local expense_transactions: sequence(string)
 
     for i, transaction in ipairs(transactions) do
-      if transaction:get_col("type") == "Income" then
-        income_transactions:push(transaction:get_col("amount"))
-      end
-      if transaction:get_col("type") == "Expense" then
-        expense_transactions:push(transaction:get_col("amount"))
+      local transaction_time = transaction:get_col("time")
+      if is_same_day(tointeger(transaction_time), time) then
+        if transaction:get_col("type") == "Income" then
+          income_transactions:push(transaction:get_col("amount"))
+        end
+        if transaction:get_col("type") == "Expense" then
+          expense_transactions:push(transaction:get_col("amount"))
+        end
       end
     end
 
     income_data = "[" .. string.concat(income_transactions, "+") .. "]"
     expense_data = "[" .. string.concat(expense_transactions, "+") .. "]"
   elseif sort == "week" then
-    transactions, err = Transactions:select(
-      ("user_id = %s AND strftime('%%Y-%%W', date) = strftime('%%Y-%%W', %s) ORDER BY date asc"):format(
-        norm.escape_literal(current_user_id),
-        norm.escape_literal(date)
-      )
-    ) -- sqlite specific
+  end
+
+  if #transactions == 0 then
+    local tp: nelt.Template
+    empty_analytics_chart(&tp)
+    sseg:patch_elements(tp:tostring())
+    return sseg.resp
   end
 
   if err ~= "" then
