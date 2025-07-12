@@ -33,8 +33,7 @@ end
 function transactions_controller.new_transaction(self: *http.Server)
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    print(err)
-    return self:error()
+io.stderr:write(err .. "\n")    return self:error()
   end
 
   local tp: nelt.Template
@@ -95,7 +94,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
@@ -166,13 +165,13 @@ function transactions_controller.update_transaction(self: *http.Server, Transact
     id = id
   }))
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
@@ -211,13 +210,13 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
     user_id = current_user_id
   }))
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
@@ -293,13 +292,13 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     user_id = current_user_id
   }))
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
   local err = transaction:delete()
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
@@ -307,7 +306,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     user_id = current_user_id
   }), { extra_sql = "ORDER BY time DESC"})
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
@@ -325,7 +324,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
 
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
-    print(err)
+    io.stderr:write(err .. "\n")
     return self:error()
   end
 
@@ -349,6 +348,196 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
   sseg:patch_signals((
     [[{ "transaction_income": %s, "transaction_expenses": %s }]]
   ):format(("%.2f"):format(transaction_income), ("%.2f"):format(transaction_expenses)))
+
+  return sseg.resp
+end
+
+function transactions_controller.analytics_chart(self: *http.Server, Transactions: norm.Model): http.Response
+  local current_user_id = self.session:get_val("current_user_id")
+  if current_user_id == "" then
+    io.stderr:write("Failed to determine current_user\n")
+    return self:error()
+  end
+
+  local transactions, err = Transactions:select(inline_map!(string, string, {
+    user_id = current_user_id
+  }))
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+
+  local sseg, err = datastar.ServerSentEventGenerator.new(self)
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+
+  sseg:patch_elements('<div id="analytics"></div>')
+  local sort: string
+
+  local signals, err = datastar.read_signals(self)
+  if err == "" then
+    local obj = signals:get_obj()
+    if obj:has("sort") then
+      sort = obj["sort"]:get_str()
+    end
+  end
+
+  sort = sort ~= "" and sort or "day"
+
+  local time = os.time()
+
+  local function is_same_day(t1: integer, t2: integer): boolean <inline>
+    return os.date("%Y-%m-%d", t1) == os.date("%Y-%m-%d", t2)
+  end
+
+  local function is_same_week(t1: integer, t2: integer) <inline>
+    return  os.date("%U", t1) ==  os.date("%U", t2) and os.date("%Y", t1) == os.date("%Y", t2)
+  end
+
+  local function is_same_month(t1: integer, t2: integer) <inline>
+    return os.date("%B", t1) == os.date("%B", t2) and os.date("%Y", t1) == os.date("%Y", t2)
+  end
+
+  local function is_same_year(t1: integer, t2: integer) <inline>
+    return os.date("%Y", t1) == os.date("%Y", t2)
+  end
+
+  local function get_week_of_month(fmt: string, t: integer): string
+    local current_day_str = os.date("%d", t)
+    local current_day = tointeger(current_day_str)
+    local week = math.ceil(current_day / 7)
+    if week == 1 then
+      return "First"
+    elseif week == 2 then
+      return "Second"
+    elseif week == 3 then
+      return "Third"
+    elseif week == 4 then
+      return "Fourth"
+    elseif week == 5 then
+      return "Fifth"
+    end
+    return ""
+  end
+
+  local transactions, err = Transactions:select(inline_map!(string, string,{
+    user_id = norm.escape_literal(current_user_id)
+  }))
+
+  local labels = "[]"
+  local income_data = "[]"
+  local expense_data = "[]"
+
+  ## local function handle_data(period, period_fn, period_fmt, periods, timeframe)
+    ## static_assert(type(period) == "string")
+    ## static_assert(type(period_fn) == "table")
+    ## static_assert(type(period_fmt) == "string")
+    ## static_assert(type(periods) == "table")
+    ## static_assert(type(timeframe) == "string")
+
+    local periods: []string = #[periods]#
+    labels = '["' .. string.concat(periods, '", "') .. '"]'
+    local #|"same_" .. timeframe .. "_transactions"|#: sequence(norm.Model.Inst)
+    for _, transaction in ipairs(transactions) do
+      local transaction_time = transaction:get_col("time")
+      if #|"is_same_" .. timeframe|#(tointeger(transaction_time), time) then
+        #|"same_" .. timeframe .. "_transactions"|#:push(transaction)
+      end
+    end
+    ## for _, period in ipairs(periods) do
+      local #|period .. "_income_transactions"|#: sequence(string)
+      local #|period .. "_expense_transactions"|#: sequence(string)
+    ## end
+    for i, transaction in ipairs(#|"same_" .. timeframe .. "_transactions"|#) do
+      local transaction_time = transaction:get_col("time")
+      local period = #[period_fn]#(#[period_fmt]#, tointeger(transaction_time))
+      local amount = transaction:get_col("amount")
+      ## for _, period in ipairs(periods) do
+        if period == #[period]# then
+          if transaction:get_col("type") == "Income" then
+            #|period .. "_income_transactions"|#:push(amount)
+          end
+          if transaction:get_col("type") == "Expense" then
+            #|period .. "_expense_transactions"|#:push(amount)
+          end
+        end
+      ## end
+    end
+
+    local income_sb: stringbuilder
+    local expense_sb: stringbuilder
+
+    income_sb:write("[")
+    expense_sb:write("[")
+
+    ## for _, period in ipairs(periods) do
+      local #|period .. "_income_data"|# = string.concat(#|period .. "_income_transactions"|#, ' + ')
+      local #|period .. "_expense_data"|# = string.concat(#|period .. "_expense_transactions"|#, ' + ')
+      income_sb:writef("%s ,", #|period .. "_income_data"|#)
+      expense_sb:writef("%s ,", #|period .. "_expense_data"|#)
+    ## end
+
+    income_sb:rollback(1)
+    expense_sb:rollback(1)
+
+    income_sb:write("]")
+    expense_sb:write("]")
+
+    income_data = income_sb:promote()
+    expense_data = expense_sb:promote()
+  ## end
+
+  if sort == "day" then
+    labels = '["' .. os.date("%A", time) .. '"]'
+
+    local income_transactions: sequence(string)
+    local expense_transactions: sequence(string)
+
+    for i, transaction in ipairs(transactions) do
+      local transaction_time = transaction:get_col("time")
+      if is_same_day(tointeger(transaction_time), time) then
+        local amount = transaction:get_col("amount")
+        if transaction:get_col("type") == "Income" then
+          income_transactions:push(amount)
+        end
+        if transaction:get_col("type") == "Expense" then
+          expense_transactions:push(amount)
+        end
+      end
+    end
+
+    income_data = "[" .. string.concat(income_transactions, "+") .. "]"
+    expense_data = "[" .. string.concat(expense_transactions, "+") .. "]"
+  elseif sort == "week" then
+    ## local days = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" }
+    local os_date = os.date
+    ## handle_data("day", os_date, "%A", days, "week")
+  elseif sort == "month" then
+    ## local days = { "First", "Second", "Third", "Fourth", "Fifth" }
+    ## handle_data("week", get_week_of_month, "%d", days, "month")
+  elseif sort == "year" then
+    ## local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
+    local os_date = os.date
+    ## handle_data("month", os_date, "%B", months, "year")
+  end
+
+  if (income_data == "[]" and expense_data == "[]") or (income_data:match("%d") == false and expense_data:match("%d") == false) then
+    local tp: nelt.Template
+    empty_analytics_chart(&tp)
+    sseg:patch_elements(tp:tostring())
+    return sseg.resp
+  end
+
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+
+  local tp: nelt.Template
+  analytics_chart(&tp, self, labels, income_data, expense_data)
+  sseg:patch_elements(tp:tostring())
 
   return sseg.resp
 end

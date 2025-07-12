@@ -90,7 +90,7 @@
               data-text="const date = new Date({{ transaction:get_col("time") }} * 1000); const day = ('0' + date.getDate()).slice(-2); const month = ('0' + (date.getMonth() + 1)).slice(-2); date.getFullYear()+'-'+(month)+'-'+(day);">
           </td>
           <td data-cell="name">{{ transaction:get_col("name") }}</td>
-          <td data-cell="amount">{{ ("%.2f"):format(tonumber(amount) ) }}</td>
+          <td data-cell="amount">₦{{ ("%.2f"):format(tonumber(amount) ) }}</td>
           <td data-cell="type">{{ transaction:get_col("type") }}</td>
           <td data-cell="description">{{ description ~= "" and description or "-" }}</td>
           <td data-cell="actions" style="display: flex; gap: var(--gap-xs)">
