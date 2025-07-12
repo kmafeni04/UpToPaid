@@ -27,7 +27,7 @@
       }
     </style>
     <a href="{{ self:url_for("index") }}">
-      <img src="/static/images/naira-coin-small.svg" alt="" />
+      <img src="/static/images/coin-small.svg" alt="" />
     </a>
     <div>
       <style>

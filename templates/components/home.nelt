@@ -108,7 +108,7 @@
             justify-content: center;
           }
         </style>
-        <img src="/static/images/naira-coin-small.svg"
+        <img src="/static/images/coin-small.svg"
              alt=""
              data-show="$open"
              style="display: none" />
