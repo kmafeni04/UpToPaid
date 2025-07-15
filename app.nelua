@@ -36,7 +36,7 @@ require ".thirdparty.inline_map"
 local schema = norm.Schema
 local type = schema.ColumnType
 
-local err = norm.migrate(db, inline_map!(string, norm.Schema.MigrationFn, {
+local err = schema.migrate(db, inline_map!(string, norm.Schema.MigrationFn, {
   ["1750497533"] = function(db: norm.Db): string
     local err = schema.create_table(db, "users", {
       { "id",       type.integer, { primary_key = true } },
