@@ -1,9 +1,9 @@
 -- TODO: Abstract repetive patch_elements calls into single function
 
-local http = require "..vendor.http-nelua.http"
-local datastar = require "..vendor.http-nelua.extras.datastar.datastar"
-local norm = require "..vendor.norm.norm"
-local nelt = require "..vendor.nelt.nelt"
+local http = require "http"
+local datastar = require "datastar"
+local norm = require "norm"
+local nelt = require "nelt"
 
 local transaction_form = require "..templates.components.transaction-form-nelt"
 local transactions_table = require "..templates.components.transactions-table-nelt"
@@ -104,7 +104,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
     return sseg.resp
   end
 
-  local transaction, err = Transactions:create(inline_map!(string, string, {
+  local transaction, err = Transactions:create(map!(string, string, {
 		time = tostring(date_to_time(date)),
 		name = name,
 		amount = amount,
@@ -117,7 +117,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
     return sseg.resp
   end
 
-  local transactions, err = Transactions:select(inline_map!(string, string, {
+  local transactions, err = Transactions:select(map!(string, string, {
     user_id = current_user_id
   }), { extra_sql = "ORDER BY time DESC"})
   if err ~= "" then
@@ -161,7 +161,7 @@ function transactions_controller.update_transaction(self: *http.Server, Transact
     return self:error()
   end
 
-  local transaction, err = Transactions:find(inline_map!(string, string, {
+  local transaction, err = Transactions:find(map!(string, string, {
     id = id
   }))
   if err ~= "" then
@@ -183,7 +183,7 @@ function transactions_controller.update_transaction(self: *http.Server, Transact
 
 
   local tp: nelt.Template
-  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = inline_map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", tointeger(time), name, amount, type, description)
+  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", tointeger(time), name, amount, type, description)
   sseg:patch_elements(tp:tostring(), {
     selector = "body",
     mode = datastar.ElementPatchMode.Append
@@ -205,7 +205,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
     return self:error()
   end
 
-  local transaction, err = Transactions:find(inline_map!(string, string, {
+  local transaction, err = Transactions:find(map!(string, string, {
     id = id,
     user_id = current_user_id
   }))
@@ -226,7 +226,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
     return sseg.resp
   end
 
-  local transaction, err = transaction:update(inline_map!(string, string, {
+  local transaction, err = transaction:update(map!(string, string, {
 		time = tostring(date_to_time(date)),
 		name = name,
 		amount = amount,
@@ -238,7 +238,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
     return sseg.resp
   end
 
-  local transactions, err = Transactions:select(inline_map!(string, string, {
+  local transactions, err = Transactions:select(map!(string, string, {
     user_id = current_user_id
   }), { extra_sql = "ORDER BY time DESC"})
   if err ~= "" then
@@ -287,7 +287,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     return self:error()
   end
 
-  local transaction, err = Transactions:find(inline_map!(string, string, {
+  local transaction, err = Transactions:find(map!(string, string, {
     id = id,
     user_id = current_user_id
   }))
@@ -302,7 +302,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
     return self:error()
   end
 
-  local transactions, err = Transactions:select(inline_map!(string, string, {
+  local transactions, err = Transactions:select(map!(string, string, {
     user_id = current_user_id
   }), { extra_sql = "ORDER BY time DESC"})
   if err ~= "" then
@@ -359,7 +359,7 @@ function transactions_controller.analytics_chart(self: *http.Server, Transaction
     return self:error()
   end
 
-  local transactions, err = Transactions:select(inline_map!(string, string, {
+  local transactions, err = Transactions:select(map!(string, string, {
     user_id = current_user_id
   }))
   if err ~= "" then
@@ -422,9 +422,14 @@ function transactions_controller.analytics_chart(self: *http.Server, Transaction
     return ""
   end
 
-  local transactions, err = Transactions:select(inline_map!(string, string,{
+  local transactions, err = Transactions:select(map!(string, string,{
     user_id = norm.escape_literal(current_user_id)
   }))
+
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
 
   local labels = "[]"
   local income_data = "[]"
@@ -528,11 +533,6 @@ function transactions_controller.analytics_chart(self: *http.Server, Transaction
     empty_analytics_chart(&tp)
     sseg:patch_elements(tp:tostring())
     return sseg.resp
-  end
-
-  if err ~= "" then
-    io.stderr:write(err .. "\n")
-    return self:error()
   end
 
   local tp: nelt.Template

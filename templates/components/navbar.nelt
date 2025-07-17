@@ -1,5 +1,5 @@
-{% local nelt = require "...vendor.nelt.nelt" %}
-{% local http = require "...vendor.http-nelua.http" %}
+{% local nelt = require "nelt" %}
+{% local http = require "http" %}
 
 {% local function navbar(tp: *nelt.Template, self: *http.Server) %}
   <div>

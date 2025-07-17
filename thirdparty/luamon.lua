@@ -52,9 +52,9 @@ local function check_modification(root_dir, file_path, callback)
     print(rel_path .. " has been modified")
 
     if os.time() - last_ran_time >= delay then
+      last_ran_time = os.time()
       lfs.chdir(root_dir)
       callback(file_path)
-      last_ran_time = os.time()
     end
   end
 end
@@ -131,7 +131,7 @@ end
 
 --[[
   Monitors for file changes in a directory and calls a callback function on any file modification
-  NB: This currently does not monitor file name changes as they do count as file modifications
+  NB: This currently does not monitor file name changes as they do not count as file modifications
 
   Usage:
   ```lua

@@ -1,5 +1,5 @@
-{% local nelt = require "..vendor.nelt.nelt" %}
-{% local http = require "..vendor.http-nelua.http" %}
+{% local nelt = require "nelt" %}
+{% local http = require "http" %}
 
 {% local function layout(tp: *nelt.Template,title: string,content: function(tp: *nelt.Template, self: *http.Server),self: *http.Server) %}
   <!DOCTYPE html>

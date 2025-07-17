@@ -1,5 +1,5 @@
-{% local nelt = require "...vendor.nelt.nelt" %}
-{% local http = require "...vendor.http-nelua.http" %}
+{% local nelt = require "nelt" %}
+{% local http = require "http" %}
 
 {% local function empty_analytics_chart(tp: *nelt.Template) %}
   <div id="analytics">

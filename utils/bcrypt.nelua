@@ -1,6 +1,6 @@
 require "string"
 
-require "..thirdparty.crypt"
+require "crypt"
 
 local bcrypt = @record{}
 

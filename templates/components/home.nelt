@@ -1,5 +1,5 @@
-{% local nelt = require "...vendor.nelt.nelt" %}
-{% local http = require "...vendor.http-nelua.http" %}
+{% local nelt = require "nelt" %}
+{% local http = require "http" %}
 
 {% local layout = require "..layout-nelt" %}
 
@@ -55,7 +55,7 @@
               transition: var(--transition-sm);
               width: 100%;
 
-              &:nth-child(5) {
+              &:nth-child(3) {
                 margin-top: auto;
               }
 
@@ -131,14 +131,6 @@
            class="{{ self.req.current_path == self:url_for("goals") and 'active' or '' }}">
           <i class="nf nf-oct-goal"></i>
           <span data-show="$open" style="display: none;">Goals</span>
-        </a>
-        <a href="">
-          <i class="nf nf-fa-tasks"></i>
-          <span data-show="$open" style="display: none;">Tasks</span>
-        </a>
-        <a href="">
-          <i class="nf nf-fa-trophy"></i>
-          <span data-show="$open" style="display: none;">Achievements</span>
         </a>
         <a href="{{ self:url_for("profile") }}"
            title="Profile"
@@ -228,12 +220,6 @@
          title="Goals"
          class="{{ self.req.current_path == self:url_for("goals") and 'active' or '' }}">
         <i class="nf nf-oct-goal"></i>
-      </a>
-      <a href="">
-        <i class="nf nf-fa-tasks"></i>
-      </a>
-      <a href="">
-        <i class="nf nf-fa-trophy"></i>
       </a>
       <a href="{{ self:url_for("profile") }}"
          title="Profile"

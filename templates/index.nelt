@@ -1,5 +1,5 @@
-{% local nelt = require "..vendor.nelt.nelt" %}
-{% local http = require "..vendor.http-nelua.http" %}
+{% local nelt = require "nelt" %}
+{% local http = require "http" %}
 
 {% local navbar = require ".components.navbar-nelt" %}
 {% local layout = require ".layout-nelt" %}

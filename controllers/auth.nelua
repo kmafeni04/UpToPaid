@@ -1,7 +1,7 @@
-local http = require "..vendor.http-nelua.http"
-local datastar = require "..vendor.http-nelua.extras.datastar.datastar"
-local norm = require "..vendor.norm.norm"
-local nelt = require "..vendor.nelt.nelt"
+local http = require "http"
+local datastar = require "datastar"
+local norm = require "norm"
+local nelt = require "nelt"
 
 local bcrypt = require "..utils.bcrypt"
 
@@ -34,7 +34,7 @@ function auth_controller.login_post(self: *http.Server, Users: norm.Model)
   if #password < 9 then
     errors:push("Password must be 9 characters or more")
   end
-  local user, err = Users:find(inline_map!(string, string, { username = username }))
+  local user, err = Users:find(map!(string, string, { username = username }))
   if err ~= "" then
     io.stderr:write(err .. "\n")
     return self:error()
@@ -93,7 +93,7 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
     errors:push("Username must be 5 characters or more")
   end
   if username ~= "" then
-    local user, err = Users:find(inline_map!(string, string, {
+    local user, err = Users:find(map!(string, string, {
       username = username
     }))
     if err ~= "" then
@@ -111,7 +111,7 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
     errors:push("Email must be a valid email")
   end
   if email ~= "" then
-    local user, err = Users:find(inline_map!(string, string, {
+    local user, err = Users:find(map!(string, string, {
       email = email
     }))
     if err ~= "" then
@@ -141,7 +141,7 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
     signup(&tp, self)
     return self:html(http.Status.OK, tp:tostring())
   end
-  local user, err = Users:create(inline_map!(string, string,{
+  local user, err = Users:create(map!(string, string,{
     username = username,
     email = email,
     password = bcrypt.encrypt(password),
