@@ -1,5 +1,5 @@
-{% local nelt = require "..vendor.nelt.nelt" %}
-{% local http = require "..vendor.http-nelua.http" %}
+{% local nelt = require "nelt" %}
+{% local http = require "http" %}
 
 {% local auth = require ".components.auth-nelt" %}
 {% local layout = require ".layout-nelt" %}
@@ -24,7 +24,7 @@
              type="text"
              name="username"
              id="username"
-             value="{{ self.req.params['username'] }}">
+             value="{{ self.req.params['username'] }}" />
     </div>
     <div class="input-div">
       <label for="password">Password</label>
@@ -34,7 +34,7 @@
              type="password"
              name="password"
              id="password"
-             value="{{ self.req.params['password'] }}">
+             value="{{ self.req.params['password'] }}" />
     </div>
     <div>
       <style>
@@ -43,7 +43,7 @@
           gap: var(--gap-xs);
         }
       </style>
-      <input type="checkbox" data-on-click="$shown = !$shown">
+      <input type="checkbox" data-on-click="$shown = !$shown" />
       <p>Show password</p>
     </div>
     <p>

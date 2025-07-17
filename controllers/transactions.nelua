@@ -1,9 +1,9 @@
 -- TODO: Abstract repetive patch_elements calls into single function
 
-local http = require "..vendor.http-nelua.http"
-local datastar = require "..vendor.http-nelua.extras.datastar.datastar"
-local norm = require "..vendor.norm.norm"
-local nelt = require "..vendor.nelt.nelt"
+local http = require "http"
+local datastar = require "extras.datastar.datastar"
+local norm = require "norm"
+local nelt = require "nelt"
 
 local transaction_form = require "..templates.components.transaction-form-nelt"
 local transactions_table = require "..templates.components.transactions-table-nelt"
@@ -426,6 +426,11 @@ function transactions_controller.analytics_chart(self: *http.Server, Transaction
     user_id = norm.escape_literal(current_user_id)
   }))
 
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+
   local labels = "[]"
   local income_data = "[]"
   local expense_data = "[]"
@@ -528,11 +533,6 @@ function transactions_controller.analytics_chart(self: *http.Server, Transaction
     empty_analytics_chart(&tp)
     sseg:patch_elements(tp:tostring())
     return sseg.resp
-  end
-
-  if err ~= "" then
-    io.stderr:write(err .. "\n")
-    return self:error()
   end
 
   local tp: nelt.Template

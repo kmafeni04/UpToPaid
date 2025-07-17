@@ -1,8 +1,8 @@
 {% require "os" %}
 
-{% local nelt = require "..vendor.nelt.nelt" %}
-{% local http = require "..vendor.http-nelua.http" %}
-{% local norm = require "..vendor.norm.norm" %}
+{% local nelt = require "nelt" %}
+{% local http = require "http" %}
+{% local norm = require "norm" %}
 
 {% local layout = require ".layout-nelt" %}
 

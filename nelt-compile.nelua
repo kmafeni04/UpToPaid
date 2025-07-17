@@ -1,6 +1,6 @@
 require "arg"
 
-local nelt = require ".vendor.nelt.nelt"
+local nelt = require "nelt"
 
 local err = nelt.compile_file(arg[1])
 assert(err == "", err)

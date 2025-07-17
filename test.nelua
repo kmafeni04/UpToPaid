@@ -1,4 +1,4 @@
-local http = require ".vendor.http-nelua.http"
+local http = require "http"
 
 require ".thirdparty.inline_map"
 

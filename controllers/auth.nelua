@@ -1,7 +1,7 @@
-local http = require "..vendor.http-nelua.http"
-local datastar = require "..vendor.http-nelua.extras.datastar.datastar"
-local norm = require "..vendor.norm.norm"
-local nelt = require "..vendor.nelt.nelt"
+local http = require "http"
+local datastar = require "extras.datastar.datastar"
+local norm = require "norm"
+local nelt = require "nelt"
 
 local bcrypt = require "..utils.bcrypt"
 
