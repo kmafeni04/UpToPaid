@@ -1,6 +1,6 @@
-local luamon = require("thirdparty.luamon")
+local fidimon = require("fidimon")
 
-luamon(nil, function(file_path)
+fidimon(nil, function(file_path)
   os.execute("killall app; nelua --cc=tcc app.nelua &")
 end, {
   include_file_types = { "nelua" },

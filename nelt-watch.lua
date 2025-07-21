@@ -1,6 +1,6 @@
-local luamon = require("thirdparty.luamon")
+local fidimon = require("fidimon")
 
-luamon(nil, function(file_path)
+fidimon(nil, function(file_path)
   if not file_path then
     print("Watching nelt files")
   else

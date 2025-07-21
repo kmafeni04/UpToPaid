@@ -45,6 +45,11 @@ return {
       repo = "https://github.com/kmafeni04/crypt-bindings-nelua",
       version = "#68c2d78f5d8c1c4d3069da09817c1194abee7019",
     },
+    {
+      name = "fidimon",
+      repo = "https://github.com/kmafeni04/fidimon",
+      version = "#a6ed34e9827fb3a3d1b087c024062a2ec5eb7571",
+    },
   },
   scripts = {
     server_watch = "nelua --script server-watch.lua",
