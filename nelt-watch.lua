@@ -2,7 +2,8 @@ local fidimon = require("fidimon")
 
 fidimon(nil, function(file_path)
   if not file_path then
-    print("Watching nelt files")
+    os.execute("nelua --cc=tcc nelt-compile-all.nelua")
+    print("Watching nelt templates")
   else
     os.execute("nelua --cc=tcc nelt-compile.nelua " .. file_path)
   end
