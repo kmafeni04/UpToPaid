@@ -21,6 +21,11 @@ return {
       version = "#89c651e38139106ffa33fa25fb59142dcaea72fb",
     },
     {
+      name = "nttp-mail",
+      repo = "https://github.com/kmafeni04/nttp-mail",
+      version = "#1ecb7e7737a869a509e7c80659900eccd1ffe664",
+    },
+    {
       name = "html-nelua",
       repo = "https://github.com/kmafeni04/html-nelua",
       version = "#653a10880a803c7df50f8723da963db124936585",
