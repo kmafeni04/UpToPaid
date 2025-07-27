@@ -1,14 +1,14 @@
-local http = require "http"
+local nttp = require "nttp"
 
 require "map"
 
 local write_sb: stringbuilder
 
-return function(app: *http.Server)
+return function(app: *nttp.Server)
 
-  app.write = function(self: *http.Server, s: string): (boolean, string)
+  app.write = function(self: *nttp.Server, s: string): string
     write_sb:write(s)
-    return true, ""
+    return ""
   end
     
   local resp, req_str = app:mock_request(app:url_for("index"))

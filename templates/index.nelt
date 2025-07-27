@@ -1,10 +1,10 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 
 {% local navbar = require ".components.navbar-nelt" %}
 {% local layout = require ".layout-nelt" %}
 
-{% local function content(tp: *nelt.Template, self: *http.Server) %}
+{% local function content(tp: *nelt.Template, self: *nttp.Server) %}
   {% navbar(tp, self) %}
 
   <div>
@@ -63,7 +63,7 @@
   </div>
 {% end %}
 
-{% local function index(tp: *nelt.Template, self: *http.Server) %}
+{% local function index(tp: *nelt.Template, self: *nttp.Server) %}
   {% layout(tp, "", content, self) %}
 {% end %}
 

@@ -1,9 +1,9 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 
 {% local layout = require "..layout-nelt" %}
 
-{% local function home(tp: *nelt.Template, self: *http.Server, head: string, sub_head: string, content: function(tp: *nelt.Template, self: *http.Server)) %}
+{% local function home(tp: *nelt.Template, self: *nttp.Server, head: string, sub_head: string, content: function(tp: *nelt.Template, self: *nttp.Server)) %}
   <div>
     <style>
       me {

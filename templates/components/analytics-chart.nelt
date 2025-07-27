@@ -1,8 +1,8 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 {% local norm = require "norm" %}
 
-{% local function analytics_chart(tp: *nelt.Template, self: *http.Server, labels: string, income_data: string, expense_data: string) %}
+{% local function analytics_chart(tp: *nelt.Template, self: *nttp.Server, labels: string, income_data: string, expense_data: string) %}
   <div id="analytics">
     <canvas id="analytics-chart"></canvas>
     <script>

@@ -1,4 +1,4 @@
-local http = require "http"
+local nttp = require "nttp"
 local datastar = require "datastar"
 local norm = require "norm"
 local nelt = require "nelt"
@@ -7,19 +7,19 @@ local bcrypt = require "..utils.bcrypt"
 
 local auth_controller = @record{}
 
-function auth_controller.login_get(self: *http.Server)
+function auth_controller.login_get(self: *nttp.Server)
   if self.session:get_val("current_user") ~= "" then
     return self:redirect(self:url_for("dashboard"))
   end
   local login = require "..templates.login-nelt"
   local tp: nelt.Template
   login(&tp, self)
-  return self:html(http.Status.OK, tp:tostring())
+  return self:html(nttp.Status.OK, tp:tostring())
 end
 
-function auth_controller.login_post(self: *http.Server, Users: norm.Model)
+function auth_controller.login_post(self: *nttp.Server, Users: norm.Model)
   local errors: sequence(string)
-  local username = http.utils.trim_wspace(self.req.params["username"])
+  local username = nttp.utils.trim_wspace(self.req.params["username"])
   local password = self.req.params["password"]
 
   if username == "" then
@@ -62,27 +62,27 @@ function auth_controller.login_post(self: *http.Server, Users: norm.Model)
     local login = require "..templates.login-nelt"
     local tp: nelt.Template
     login(&tp, self)
-    return self:html(http.Status.OK, tp:tostring())
+    return self:html(nttp.Status.OK, tp:tostring())
   end
   self.session:set_val("current_user", username)
   self.session:set_val("current_user_id", user:get_col("id"))
   return self:redirect(self:url_for("dashboard"))
 end
 
-function auth_controller.signup_get(self: *http.Server)
+function auth_controller.signup_get(self: *nttp.Server)
   if self.session:get_val("current_user") ~= "" then
     return self:redirect(self:url_for("dashboard"))
   end
   local signup = require "..templates.signup-nelt"
   local tp: nelt.Template
   signup(&tp, self)
-  return self:html(http.Status.OK, tp:tostring())
+  return self:html(nttp.Status.OK, tp:tostring())
 end
 
-function auth_controller.signup_post(self: *http.Server, Users: norm.Model): http.Response
+function auth_controller.signup_post(self: *nttp.Server, Users: norm.Model): nttp.Response
   local errors: sequence(string)
-  local username = http.utils.trim_wspace(self.req.params["username"])
-  local email = http.utils.trim_wspace(self.req.params["email"]:lower())
+  local username = nttp.utils.trim_wspace(self.req.params["username"])
+  local email = nttp.utils.trim_wspace(self.req.params["email"]:lower())
   local password = self.req.params["password"]
   local confirm_password = self.req.params["confirm-password"]
 
@@ -139,7 +139,7 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
     local signup = require "..templates.signup-nelt"
     local tp: nelt.Template
     signup(&tp, self)
-    return self:html(http.Status.OK, tp:tostring())
+    return self:html(nttp.Status.OK, tp:tostring())
   end
   local user, err = Users:create(map!(string, string,{
     username = username,
@@ -155,7 +155,7 @@ function auth_controller.signup_post(self: *http.Server, Users: norm.Model): htt
   return self:redirect(self:url_for("dashboard"))
 end
 
-function auth_controller.logout(self: *http.Server)
+function auth_controller.logout(self: *nttp.Server)
   local err = self.session:set_val("current_user", "") 
   if err ~= "" then
     io.stderr:write(err .. "\n")

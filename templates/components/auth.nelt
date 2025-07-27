@@ -1,9 +1,9 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 
 {% local navbar = require ".navbar-nelt" %}
 
-{% local function auth(tp: *nelt.Template, self: *http.Server, content: function(tp: *nelt.Template, self: *http.Server)) %}
+{% local function auth(tp: *nelt.Template, self: *nttp.Server, content: function(tp: *nelt.Template, self: *nttp.Server)) %}
   {% navbar(tp, self) %}
 
   <div>

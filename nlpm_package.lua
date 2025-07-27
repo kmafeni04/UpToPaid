@@ -11,14 +11,14 @@
 return {
   dependencies = {
     {
-      name = "http-nelua",
-      repo = "https://github.com/kmafeni04/http-nelua",
-      version = "#de87bf9fbd5218e79925b45292575cc892a92a75",
+      name = "nttp",
+      repo = "https://github.com/kmafeni04/nttp",
+      version = "#d8406960aca9b3ca683c5993e0b12d604f644baa",
     },
     {
-      name = "http-nelua-datastar-sdk",
-      repo = "https://github.com/kmafeni04/http-nelua-datastar-sdk",
-      version = "#85e3afb57cfde3cdb822a650a40da5423c63aeba",
+      name = "nttp-datastar-sdk",
+      repo = "https://github.com/kmafeni04/nttp-datastar-sdk",
+      version = "#89c651e38139106ffa33fa25fb59142dcaea72fb",
     },
     {
       name = "html-nelua",
@@ -38,7 +38,7 @@ return {
     {
       name = "dotenv-nelua",
       repo = "https://github.com/kmafeni04/dotenv-nelua",
-      version = "#ce529c29ef6c98acf793af7bd40e37f7f57130a4",
+      version = "#c1d05bea418212197b9bb2a9fb7d9fe8ca50e342",
     },
     {
       name = "crypt-bindings-nelua",

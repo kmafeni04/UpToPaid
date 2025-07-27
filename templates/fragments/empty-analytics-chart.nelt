@@ -1,5 +1,4 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
 
 {% local function empty_analytics_chart(tp: *nelt.Template) %}
   <div id="analytics">

@@ -1,7 +1,7 @@
 {% require "os" %}
 
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 {% local norm = require "norm" %}
 
 {% local layout = require ".layout-nelt" %}
@@ -13,7 +13,7 @@
 {% local empty_transactions_table = require ".fragments.empty-transactions-table-nelt" %}
 {% local empty_analytics_chart = require ".fragments.empty-analytics-chart-nelt" %}
 
-{% local function dashboard_content(tp: *nelt.Template, self: *http.Server) %}
+{% local function dashboard_content(tp: *nelt.Template, self: *nttp.Server) %}
   {% local transactions = (@*sequence(norm.Model.Inst))(tp.data) %}
   {% local transaction_income: number %}
   {% local transaction_expenses: number %}
@@ -169,12 +169,12 @@
   </div>
 {% end %}
 
-{% local function content(tp: *nelt.Template, self: *http.Server) %}
+{% local function content(tp: *nelt.Template, self: *nttp.Server) %}
   {% local sub_head =  "Welcome, " .. self.session:get_val("current_user") %}
   {% home(tp, self, "Dashboard", sub_head, dashboard_content) %}
 {% end %}
 
-{% local function dashboard(tp: *nelt.Template, self: *http.Server) %}
+{% local function dashboard(tp: *nelt.Template, self: *nttp.Server) %}
   {% layout(tp, "", content, self) %}
 {% end %}
 

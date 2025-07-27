@@ -1,6 +1,6 @@
 -- TODO: Abstract repetive patch_elements calls into single function
 
-local http = require "http"
+local nttp = require "nttp"
 local datastar = require "datastar"
 local norm = require "norm"
 local nelt = require "nelt"
@@ -30,7 +30,7 @@ local function date_to_time(date: string)
   return time
 end
 
-function transactions_controller.new_transaction(self: *http.Server)
+function transactions_controller.new_transaction(self: *nttp.Server)
   local sseg, err = datastar.ServerSentEventGenerator.new(self)
   if err ~= "" then
 io.stderr:write(err .. "\n")    return self:error()
@@ -46,7 +46,7 @@ io.stderr:write(err .. "\n")    return self:error()
   return sseg.resp
 end
 
-local function validate_transactions_form(self: *http.Server)
+local function validate_transactions_form(self: *nttp.Server)
   local errors: sequence(string)
   local date = self.req.params["date"]
   if date == "" then
@@ -85,7 +85,7 @@ local function validate_transactions_form(self: *http.Server)
   return errors, date, name, amount, type, description
 end
 
-function transactions_controller.transactions_post(self: *http.Server, Transactions: norm.Model)
+function transactions_controller.transactions_post(self: *nttp.Server, Transactions: norm.Model)
   local current_user_id = self.session:get_val("current_user_id")
   if current_user_id == "" then
     print("Failed to determine current_user")
@@ -154,7 +154,7 @@ function transactions_controller.transactions_post(self: *http.Server, Transacti
   return sseg.resp
 end
 
-function transactions_controller.update_transaction(self: *http.Server, Transactions: norm.Model)
+function transactions_controller.update_transaction(self: *nttp.Server, Transactions: norm.Model)
   local id = self.req.params["id"]
   if id == "" then
     print("Transaction ID was an empty string")
@@ -192,7 +192,7 @@ function transactions_controller.update_transaction(self: *http.Server, Transact
   return sseg.resp
 end
 
-function transactions_controller.transaction_put(self: *http.Server, Transactions: norm.Model)
+function transactions_controller.transaction_put(self: *nttp.Server, Transactions: norm.Model)
   local current_user_id = self.session:get_val("current_user_id")
   if current_user_id == "" then
     print("Failed to determine current_user")
@@ -275,7 +275,7 @@ function transactions_controller.transaction_put(self: *http.Server, Transaction
   return sseg.resp
 end
 
-function transactions_controller.transaction_delete(self: *http.Server, Transactions: norm.Model)
+function transactions_controller.transaction_delete(self: *nttp.Server, Transactions: norm.Model)
   local current_user_id = self.session:get_val("current_user_id")
   if current_user_id == "" then
     print("Failed to determine current_user")
@@ -352,7 +352,7 @@ function transactions_controller.transaction_delete(self: *http.Server, Transact
   return sseg.resp
 end
 
-function transactions_controller.analytics_chart(self: *http.Server, Transactions: norm.Model): http.Response
+function transactions_controller.analytics_chart(self: *nttp.Server, Transactions: norm.Model): nttp.Response
   local current_user_id = self.session:get_val("current_user_id")
   if current_user_id == "" then
     io.stderr:write("Failed to determine current_user\n")

@@ -1,7 +1,7 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 
-{% local function layout(tp: *nelt.Template,title: string,content: function(tp: *nelt.Template, self: *http.Server),self: *http.Server) %}
+{% local function layout(tp: *nelt.Template,title: string,content: function(tp: *nelt.Template, self: *nttp.Server),self: *nttp.Server) %}
   <!DOCTYPE html>
   <html lang="en">
 

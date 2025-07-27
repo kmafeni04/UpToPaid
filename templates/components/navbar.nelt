@@ -1,7 +1,7 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 
-{% local function navbar(tp: *nelt.Template, self: *http.Server) %}
+{% local function navbar(tp: *nelt.Template, self: *nttp.Server) %}
   <div>
     <style>
       :root {

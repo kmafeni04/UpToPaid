@@ -1,10 +1,10 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 
 {% local auth = require ".components.auth-nelt" %}
 {% local layout = require ".layout-nelt" %}
 
-{% local function login_content(tp: *nelt.Template, self: *http.Server) %}
+{% local function login_content(tp: *nelt.Template, self: *nttp.Server) %}
 
   {% local errors: sequence(string) %}
   {% if self.req.params["errors"] ~= "" then %}
@@ -70,11 +70,11 @@
   </form>
 {% end %}
 
-{% local function content(tp: *nelt.Template, self: *http.Server) %}
+{% local function content(tp: *nelt.Template, self: *nttp.Server) %}
   {% auth(tp, self, login_content) %}
 {% end %}
 
-{% local function login(tp: *nelt.Template, self: *http.Server) %}
+{% local function login(tp: *nelt.Template, self: *nttp.Server) %}
   {% layout(tp, "", content, self) %}
 {% end %}
 

@@ -1,7 +1,7 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 
-{% local function empty_transactions_table(tp: *nelt.Template, self: *http.Server) %}
+{% local function empty_transactions_table(tp: *nelt.Template, self: *nttp.Server) %}
   <div id="transactions_table">
     <style>
       me {

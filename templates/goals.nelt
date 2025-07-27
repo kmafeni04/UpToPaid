@@ -1,16 +1,16 @@
 {% local nelt = require "nelt" %}
-{% local http = require "http" %}
+{% local nttp = require "nttp" %}
 {% local layout = require ".layout-nelt" %}
 {% local home = require ".components.home-nelt" %}
 
-{% local function goals_content(tp: *nelt.Template, self: *http.Server) %}
+{% local function goals_content(tp: *nelt.Template, self: *nttp.Server) %}
 {% end %}
 
-{% local function content(tp: *nelt.Template, self: *http.Server) %}
+{% local function content(tp: *nelt.Template, self: *nttp.Server) %}
   {% home(tp, self, "Goals", "", goals_content) %}
 {% end %}
 
-{% local function goals(tp: *nelt.Template, self: *http.Server) %}
+{% local function goals(tp: *nelt.Template, self: *nttp.Server) %}
   {% layout(tp, "", content, self) %}
 {% end %}
 
