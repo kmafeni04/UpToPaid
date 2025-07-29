@@ -1,5 +1,5 @@
-{% local nelt = require "nelt" %}
-{% local nttp = require "nttp" %}
+{% local nelt = require "nelt.nelt" %}
+{% local nttp = require "nttp.nttp" %}
 
 {% local navbar = require ".components.navbar-nelt" %}
 {% local layout = require ".layout-nelt" %}

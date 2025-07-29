@@ -1,4 +1,4 @@
-local fidimon = require("fidimon")
+local fidimon = require("fidimon.fidimon")
 
 fidimon(nil, function(file_path)
   if not file_path then

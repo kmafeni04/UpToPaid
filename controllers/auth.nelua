@@ -1,7 +1,7 @@
-local nttp = require "nttp"
-local datastar = require "datastar"
-local norm = require "norm"
-local nelt = require "nelt"
+local nttp = require "nttp.nttp"
+local datastar = require "nttp-datastar-sdk.datastar"
+local norm = require "norm.norm"
+local nelt = require "nelt.nelt"
 
 local bcrypt = require "..utils.bcrypt"
 
@@ -156,7 +156,7 @@ function auth_controller.signup_post(self: *nttp.Server, Users: norm.Model): ntt
 end
 
 function auth_controller.logout(self: *nttp.Server)
-  local err = self.session:set_val("current_user", "") 
+  local err = self.session:set_val("current_user", "")
   if err ~= "" then
     io.stderr:write(err .. "\n")
     return self:error()

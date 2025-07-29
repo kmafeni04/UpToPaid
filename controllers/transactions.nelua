@@ -1,9 +1,9 @@
 -- TODO: Abstract repetive patch_elements calls into single function
 
-local nttp = require "nttp"
-local datastar = require "datastar"
-local norm = require "norm"
-local nelt = require "nelt"
+local nttp = require "nttp.nttp"
+local datastar = require "nttp-datastar-sdk.datastar"
+local norm = require "norm.norm"
+local nelt = require "nelt.nelt"
 
 local transaction_form = require "..templates.components.transaction-form-nelt"
 local transactions_table = require "..templates.components.transactions-table-nelt"

@@ -1,7 +1,7 @@
 {# TODO: Implementing sorting of the table based on the th element using radio buttons #}
-{% local nelt = require "nelt" %}
-{% local nttp = require "nttp" %}
-{% local norm = require "norm" %}
+{% local nelt = require "nelt.nelt" %}
+{% local nttp = require "nttp.nttp" %}
+{% local norm = require "norm.norm" %}
 
 {% local function transactions_table(tp: *nelt.Template, self: *nttp.Server) %}
   {% local transactions = (@*sequence(norm.Model.Inst))(tp.data) %}

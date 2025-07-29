@@ -1,14 +1,14 @@
-local nttp = require "nttp"
-local datastar = require "datastar"
-local norm = require "norm"
-local nelt = require "nelt"
+local nttp = require "nttp.nttp"
+local datastar = require "nttp-datastar-sdk.datastar"
+local norm = require "norm.norm"
+local nelt = require "nelt.nelt"
 
 local bcrypt = require ".utils.bcrypt"
 
 local auth_controller = require ".controllers.auth"
 local transactions_controller = require ".controllers.transactions"
 
-require "map"
+require "map-nelua.map"
 
 ## if PROD then
 -- postgres

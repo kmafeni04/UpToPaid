@@ -1,5 +1,5 @@
-{% local nelt = require "nelt" %}
-{% local nttp = require "nttp" %}
+{% local nelt = require "nelt.nelt" %}
+{% local nttp = require "nttp.nttp" %}
 
 {% local function layout(tp: *nelt.Template,title: string,content: function(tp: *nelt.Template, self: *nttp.Server),self: *nttp.Server) %}
   <!DOCTYPE html>

@@ -1,4 +1,4 @@
-{% local nelt = require "nelt" %}
+{% local nelt = require "nelt.nelt" %}
 
 {% local function transaction_form(tp: *nelt.Template, action: string, time: integer, name: string, amount: string, type: string, description: string) %}
   <div id="transaction_form_popup"

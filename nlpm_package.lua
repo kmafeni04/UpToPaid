@@ -13,27 +13,27 @@ return {
     {
       name = "nttp",
       repo = "https://github.com/kmafeni04/nttp",
-      version = "#d8406960aca9b3ca683c5993e0b12d604f644baa",
+      version = "#7b03ae14fb011d93173e8e20c752fc2c1426d13c",
     },
     {
       name = "nttp-datastar-sdk",
       repo = "https://github.com/kmafeni04/nttp-datastar-sdk",
-      version = "#89c651e38139106ffa33fa25fb59142dcaea72fb",
+      version = "#eaf6f0851e5049a2e7d774dd97c410a2ef8d4f8b",
     },
     {
       name = "nttp-mail",
       repo = "https://github.com/kmafeni04/nttp-mail",
-      version = "#1ecb7e7737a869a509e7c80659900eccd1ffe664",
+      version = "#53236f5ab62fd8e7330c0196416f0c46fe0081be",
     },
     {
       name = "html-nelua",
       repo = "https://github.com/kmafeni04/html-nelua",
-      version = "#653a10880a803c7df50f8723da963db124936585",
+      version = "#e7dd27e994af8274a38a863b2d0817e01e101028",
     },
     {
       name = "norm",
       repo = "https://github.com/kmafeni04/norm",
-      version = "#4ba6e028e069059c907859cd727307ed20ac73a7",
+      version = "#921e3e3aed7b5752ddb6fca58b1339d531417bca",
     },
     {
       name = "nelt",
@@ -43,7 +43,7 @@ return {
     {
       name = "dotenv-nelua",
       repo = "https://github.com/kmafeni04/dotenv-nelua",
-      version = "#c1d05bea418212197b9bb2a9fb7d9fe8ca50e342",
+      version = "#bae178f2f6929b5ef3404890df810326f4ff0baf",
     },
     {
       name = "crypt-bindings-nelua",

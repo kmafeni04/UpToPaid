@@ -1,8 +1,8 @@
 {% require "os" %}
 
-{% local nelt = require "nelt" %}
-{% local nttp = require "nttp" %}
-{% local norm = require "norm" %}
+{% local nelt = require "nelt.nelt" %}
+{% local nttp = require "nttp.nttp" %}
+{% local norm = require "norm.norm" %}
 
 {% local layout = require ".layout-nelt" %}
 

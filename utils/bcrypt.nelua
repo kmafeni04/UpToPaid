@@ -1,6 +1,6 @@
 require "string"
 
-require "crypt"
+require "crypt-bindings-nelua.crypt"
 
 local bcrypt = @record{}
 

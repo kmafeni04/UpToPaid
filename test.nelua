@@ -1,6 +1,6 @@
-local nttp = require "nttp"
+local nttp = require "nttp.nttp"
 
-require "map"
+require "map-nelua.map"
 
 local write_sb: stringbuilder
 
@@ -10,7 +10,7 @@ return function(app: *nttp.Server)
     write_sb:write(s)
     return ""
   end
-    
+
   local resp, req_str = app:mock_request(app:url_for("index"))
   assert(resp.status == 200)
 

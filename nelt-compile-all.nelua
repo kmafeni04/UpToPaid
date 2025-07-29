@@ -1,4 +1,4 @@
-local nelt = require "nelt"
+local nelt = require "nelt.nelt"
 
 ##[[
   local function get_files(path)
