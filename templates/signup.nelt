@@ -15,7 +15,7 @@
   <form action="{{ self:url_for(" signup") }}"
         method="POST"
         data-signals-shown="false">
-    <h1>Create a new account</h1>
+    <h1>Register</h1>
     <div class="input-div">
       <label for="username">Username</label>
       <input required
@@ -54,16 +54,11 @@
              id="confirm-password"
              value="{{ self.req.params['confirm-password'] }}" />
     </div>
-    <div>
-      <style>
-        me {
-          display: flex;
-          gap: var(--gap-xs);
-        }
-      </style>
-      <input type="checkbox" data-on-click="$shown = !$shown" />
-      <p>Show password</p>
-    </div>
+
+    <label for="show-password">
+      <input id="show-password" type="checkbox" data-on-click="$shown = !$shown" />
+      Show password
+    </label>
     <p>
       Already have an account? <a href="{{ self:url_for("login") }}">Log in</a>
     </p>

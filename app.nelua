@@ -32,42 +32,42 @@ require "map-nelua.map"
       }
     })
   ## end
-local schema = norm.Schema
-local type = schema.ColumnType
+  local schema = norm.Schema
+  local type = schema.ColumnType
 
-local err = schema.migrate(db, map!(string, norm.Schema.MigrationFn, {
-  ["1750497533"] = function(db: norm.Db): string
-    local err = schema.create_table(db, "users", {
-      { "id",       type.integer, { primary_key = true } },
-      { "username", type.text, { unique = true } },
-      { "email",    type.text, { unique = true } },
-      { "password", type.text }
-    }, { strict = true })
-    return err
-  end,
+  local err = schema.migrate(db, map!(string, norm.Schema.MigrationFn, {
+    ["1750497533"] = function(db: norm.Db): string
+      local err = schema.create_table(db, "users", {
+        { "id",       type.integer, { primary_key = true } },
+        { "username", type.text, { unique = true } },
+        { "email",    type.text, { unique = true } },
+        { "password", type.text }
+      }, { strict = true })
+      return err
+    end,
 
-  ["1750722036"] = function(db: norm.Db): string
-    local _, err = db:insert("users", map!(string, string, {
-      username = "testuser",
-      email = "test@test.com",
-      password = bcrypt.encrypt("testpassword")
-    }))
-    return err
-  end,
+    ["1750722036"] = function(db: norm.Db): string
+      local _, err = db:insert("users", map!(string, string, {
+        username = "testuser",
+        email = "test@test.com",
+        password = bcrypt.encrypt("testpassword")
+      }))
+      return err
+    end,
 
-  ["1750890982"] = function(db: norm.Db): string
-    local err = schema.create_table(db, "transactions", {
-			{ "id",          type.integer, { primary_key = true } },
-			{ "time",        type.integer },
-			{ "name",        type.text },
-			{ "amount",      type.real },
-			{ "type",        type.text },
-			{ "description", type.text },
-			{ "user_id",     type.integer },
-    }, { strict = true })
-    return err
-  end
-}))
+    ["1750890982"] = function(db: norm.Db): string
+      local err = schema.create_table(db, "transactions", {
+        { "id",          type.integer, { primary_key = true } },
+        { "time",        type.integer },
+        { "name",        type.text },
+        { "amount",      type.real },
+        { "type",        type.text },
+        { "description", type.text },
+        { "user_id",     type.integer },
+      }, { strict = true })
+      return err
+    end
+  }))
 ## end
 
 local app = nttp.Server.new({
@@ -106,6 +106,18 @@ local Transactions, err = norm.Model.new(&db, "transactions", "Transactions", {
 })
 assert(err == "", err)
 
+app:before_filter(function(self: *nttp.Server): (boolean, nttp.Response)
+  local logged_in_routes = map!(string, boolean, {
+    [self:url_for("login")] = true,
+    [self:url_for("signup")] = true,
+    [self:url_for("forgot_password")] = true,
+  })
+  if self.session:get_val("current_user") ~= "" and logged_in_routes:has(self.req.current_path) then
+    return true, self:redirect(self:url_for("dashboard"))
+  end
+  return false
+end)
+
 app:get("index", "/", function(self: *nttp.Server): nttp.Response
   if self.session:get_val("current_user") ~= "" then
     return self:redirect(self:url_for("dashboard"))
@@ -134,6 +146,22 @@ end)
 
 app:post("logout", "/logout", function(self: *nttp.Server): nttp.Response
   return auth_controller.logout(self)
+end)
+
+app:get("forgot_password", "/forgot-password", function(self: *nttp.Server): nttp.Response
+  return auth_controller.forgot_password_get(self)
+end)
+
+app:post("forgot_password", "/forgot-password", function(self: *nttp.Server): nttp.Response
+  return auth_controller.forgot_password_post(self, Users)
+end)
+
+app:post("password_reset_sent", "/forgot-password/code-sent", function(self: *nttp.Server): nttp.Response
+  return auth_controller.password_reset_sent(self)
+end)
+
+app:post("password_reset", "/forgot-password/reset", function(self: *nttp.Server): nttp.Response
+  return auth_controller.password_reset(self, Users)
 end)
 
 app:get("home", "/home", function(self: *nttp.Server): nttp.Response

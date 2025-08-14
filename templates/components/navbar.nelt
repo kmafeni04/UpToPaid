@@ -17,7 +17,7 @@
         top: 0;
         height: var(--nav-height);
         padding-block: var(--padding-sm);
-        padding-inline: var(--padding-md);
+        padding-inline: var(--padding-lg);
         width: 100svw;
         color: var(--font-color-inverse);
 
@@ -38,7 +38,6 @@
         }
       </style>
       <a href="{{ self:url_for("login") }}" class="btn btn--inverse">Log in</a>
-      <a href="{{ self:url_for("signup") }}" class="btn btn--inverse">Sign Up</a>
     </div>
   </div>
 {% end %}

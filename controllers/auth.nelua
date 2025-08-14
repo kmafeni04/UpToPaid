@@ -2,15 +2,15 @@ local nttp = require "nttp.nttp"
 local datastar = require "nttp-datastar-sdk.datastar"
 local norm = require "norm.norm"
 local nelt = require "nelt.nelt"
+local mail = require "nttp-mail.mail"
+local env, err= require("dotenv-nelua.dotenv").load()
+assert(err == "", err)
 
 local bcrypt = require "..utils.bcrypt"
 
 local auth_controller = @record{}
 
 function auth_controller.login_get(self: *nttp.Server)
-  if self.session:get_val("current_user") ~= "" then
-    return self:redirect(self:url_for("dashboard"))
-  end
   local login = require "..templates.login-nelt"
   local tp: nelt.Template
   login(&tp, self)
@@ -70,9 +70,6 @@ function auth_controller.login_post(self: *nttp.Server, Users: norm.Model)
 end
 
 function auth_controller.signup_get(self: *nttp.Server)
-  if self.session:get_val("current_user") ~= "" then
-    return self:redirect(self:url_for("dashboard"))
-  end
   local signup = require "..templates.signup-nelt"
   local tp: nelt.Template
   signup(&tp, self)
@@ -173,6 +170,142 @@ function auth_controller.logout(self: *nttp.Server)
   end
   sseg:redirect(self:url_for("index"))
   return sseg.resp
+end
+
+function auth_controller.forgot_password_get(self: *nttp.Server)
+  local forgot_password = require "..templates.forgot_password-nelt"
+  local tp: nelt.Template
+  forgot_password(&tp, self)
+  return self:html(nttp.Status.OK, tp:tostring())
+end
+
+function auth_controller.forgot_password_post(self: *nttp.Server, Users: norm.Model)
+  local errors: sequence(string)
+  local param_email = self.req.params["email"]
+  local user, err = Users:find(map!(string, string, {
+    email = param_email,
+  }))
+  if err ~= "" or not next(user.row) then
+    errors:push("Email does not exist")
+  end
+  if #errors > 0 then
+    self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
+    local forgot_password = require "..templates.forgot_password-nelt"
+    local tp: nelt.Template
+    forgot_password(&tp, self)
+    return self:html(nttp.Status.OK, tp:tostring())
+  end
+  self.session:set_val("reset_email", param_email)
+  math.randomseed(os.time())
+  self.session:set_val("reset_code", tostring(math.random(1000, 9999)))
+  local mailer_username = env:get("MAILER_USERNAME")
+  if mailer_username == "" then
+    io.stderr:write("env 'MAILER_USERNAME' was empty\n")
+    return self:error()
+  end
+  local mailer_password = env:get("MAILER_PASSWORD")
+  if mailer_password == "" then
+    io.stderr:write("env 'MAILER_PASSWORD' was empty\n")
+    return self:error()
+  end
+  local mailer, err = mail.new({
+    host = "smtp.gmail.com",
+    port = 587,
+    starttls = true,
+    username = mailer_username,
+    password = mailer_password,
+  })
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+  local err = mailer:send({
+    from = ("leonard mafeni <%s>"):format(mailer_username),
+    to = { param_email },
+    subject = "Password Reset",
+    content_type = "text/html",
+    body = ([[<p>Do not reply this email</p>
+<p>Your reset code is:</p>
+<h2>%s</h2>
+<p>If you did not request to reset, kindly ignore this and nothing will be changed</p>]]):format(self.session:get_val("reset_code")),
+  })
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+  local password_reset_sent = require "..templates.password_reset_sent-nelt"
+  local tp: nelt.Template
+  password_reset_sent(&tp, self)
+  return self:html(nttp.Status.OK, tp:tostring())
+end
+
+function auth_controller.password_reset_sent(self: *nttp.Server)
+  local errors: sequence(string)
+  local reset_code = nttp.utils.trim_wspace(self.req.params["reset-code"])
+  if reset_code == "" then
+    errors:push("Reset code cannot be empty")
+  end
+  if reset_code ~= self.session:get_val("reset_code") then
+    errors:push("Incorrect reset code")
+  end
+  if #errors ~= 0 then
+    self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
+    local password_reset_sent = require "..templates.password_reset_sent-nelt"
+    local tp: nelt.Template
+    password_reset_sent(&tp, self)
+    return self:html(nttp.Status.OK, tp:tostring())
+  end
+  local password_reset_form = require "..templates.password_reset_form-nelt"
+  local tp: nelt.Template
+  password_reset_form(&tp, self)
+  return self:html(nttp.Status.OK, tp:tostring())
+end
+
+function auth_controller.password_reset(self: *nttp.Server, Users: norm.Model)
+  local email = self.session:get_val("reset_email")
+  local password = self.req.params["password"]
+  local confirm_password = self.req.params["confirm-password"]
+
+  local errors: sequence(string)
+  if email == "" then
+    errors:push("Email is required")
+  end
+  if not email:match("[%w_]+@[%w_]+%.[%w][%w]+") then
+    errors:push("Email must be a valid email")
+  end
+  if password == "" then
+    errors:push("Password is required")
+  end
+  if #password < 9 then
+    errors:push("Password must be 9 characters or more")
+  end
+  if confirm_password == "" then
+    errors:push("Confirm password is required")
+  end
+  if password ~= confirm_password then
+    errors:push("Password and confirm password do not match")
+  end
+  local user, err = Users:find(map!(string, string, {
+    email = email
+  }))
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+  if not next(user.row) then
+    errors:push("User does not exist")
+  end
+  if #errors ~= 0 then
+    self.req.params["errors"] = string.concat(errors, "\n") .. "\n"
+    local password_reset_form = require "..templates.password_reset_form-nelt"
+    local tp: nelt.Template
+    password_reset_form(&tp, self)
+    return self:html(nttp.Status.OK, tp:tostring())
+  end
+  user:update(map!(string, string, {
+    password = bcrypt.encrypt(password)
+  }))
+  return self:redirect(self:url_for("login"))
 end
 
 return auth_controller

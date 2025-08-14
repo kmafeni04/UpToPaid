@@ -26,11 +26,6 @@ return {
       version = "#53236f5ab62fd8e7330c0196416f0c46fe0081be",
     },
     {
-      name = "html-nelua",
-      repo = "https://github.com/kmafeni04/html-nelua",
-      version = "#e7dd27e994af8274a38a863b2d0817e01e101028",
-    },
-    {
       name = "norm",
       repo = "https://github.com/kmafeni04/norm",
       version = "#921e3e3aed7b5752ddb6fca58b1339d531417bca",

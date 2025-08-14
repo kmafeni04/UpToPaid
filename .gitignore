@@ -1,3 +1,4 @@
 *.db
 *-nelt.nelua
+.env
 nlpm_packages

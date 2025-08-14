@@ -13,7 +13,7 @@
         display: flex;
         align-items: center;
         height: 100svh;
-        padding: var(--padding-md);
+        padding: var(--padding-lg);
         padding-top: var(--nav-height);
 
         &>img {
