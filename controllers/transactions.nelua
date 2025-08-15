@@ -37,7 +37,7 @@ io.stderr:write(err .. "\n")    return self:error()
   end
 
   local tp: nelt.Template
-  transaction_form(&tp,"@post('" .. self:url_for("transactions") .. "', { contentType: 'form' })",  os.time())
+  transaction_form(&tp, self, "@post('" .. self:url_for("transactions") .. "', { contentType: 'form' })",  os.time())
   sseg:patch_elements(tp:tostring(), {
     selector = "body",
     mode = datastar.ElementPatchMode.Append
@@ -183,7 +183,7 @@ function transactions_controller.update_transaction(self: *nttp.Server, Transact
 
 
   local tp: nelt.Template
-  transaction_form(&tp,"@put('" .. self:url_for("transaction", { route_params = map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", tointeger(time), name, amount, type, description)
+  transaction_form(&tp, self, "@put('" .. self:url_for("transaction", { route_params = map!(string, string, { id = id }) }) .. "', { contentType: 'form' })", tointeger(time), name, amount, type, description)
   sseg:patch_elements(tp:tostring(), {
     selector = "body",
     mode = datastar.ElementPatchMode.Append

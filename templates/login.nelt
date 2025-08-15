@@ -17,6 +17,9 @@
         method="POST"
         data-signals-shown="false">
     <h1>Welcome back</h1>
+    <input type="hidden"
+           name="csrf_token"
+           value="{{ nttp.csrf.generate_token(self) }}" />
     <div class="input-div">
       <label for="username">Username</label>
       <input required

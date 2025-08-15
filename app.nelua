@@ -110,6 +110,11 @@ local Transactions, err = norm.Model.new(&db, "transactions", "Transactions", {
 assert(err == "", err)
 
 app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
+  nttp.csrf.generate_token(self)
+  return Option.None()
+end)
+
+app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
   local logged_in_routes = map!(string, boolean, {
     [self:url_for("login")] = true,
     [self:url_for("signup")] = true,
@@ -136,6 +141,9 @@ app:get("login", "/login", function(self: *nttp.Server): nttp.Response
 end)
 
 app:post("login", "/login", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
   return auth_controller.login_post(self, Users)
 end)
 
@@ -144,10 +152,17 @@ app:get("signup", "/signup", function(self: *nttp.Server): nttp.Response
 end)
 
 app:post("signup", "/signup", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
   return auth_controller.signup_post(self, Users)
 end)
 
 app:post("logout", "/logout", function(self: *nttp.Server): nttp.Response
+  local resp = datastar.csrf(self)
+  if resp:is_some() then
+    return resp:get_some()
+  end
   return auth_controller.logout(self)
 end)
 
@@ -156,14 +171,23 @@ app:get("forgot_password", "/forgot-password", function(self: *nttp.Server): ntt
 end)
 
 app:post("forgot_password", "/forgot-password", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
   return auth_controller.forgot_password_post(self, Users)
 end)
 
 app:post("password_reset_sent", "/forgot-password/code-sent", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
   return auth_controller.password_reset_sent(self)
 end)
 
 app:post("password_reset", "/forgot-password/reset", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
   return auth_controller.password_reset(self, Users)
 end)
 
@@ -196,6 +220,9 @@ app:get("new_transaction", "/transactions/create", function(self: *nttp.Server):
 end)
 
 app:post("transactions", "/transactions", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
   return transactions_controller.transactions_post(self, Transactions)
 end)
 
@@ -204,10 +231,17 @@ app:get("update_transaction", "/transactions/:id/update", function(self: *nttp.S
 end)
 
 app:put("transaction", "/transactions/:id", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
   return transactions_controller.transaction_put(self, Transactions)
 end)
 
 app:delete("transaction", "/transactions/:id", function(self: *nttp.Server): nttp.Response
+  local resp = datastar.csrf(self)
+  if resp:is_some() then
+    return resp:get_some()
+  end
   return transactions_controller.transaction_delete(self, Transactions)
 end)
 

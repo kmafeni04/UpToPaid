@@ -139,6 +139,7 @@
           <span data-show="$open" style="display: none;">Profile</span>
         </a>
         <button title="Log out"
+                data-signals-csrf_token="'{{ nttp.csrf.generate_token(self) }}'"
                 data-on-click="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
           <i class="nf nf-md-exit_run"></i>
           <span data-show="$open" style="display: none;">Log out</span>
@@ -227,6 +228,7 @@
         <i class="nf nf-fa-user"></i>
       </a>
       <button title="Log out"
+              data-signals-csrf_token="'{{ nttp.csrf.generate_token(self) }}'"
               data-on-click="confirm('Are you sure you would like to logout?') && @post('{{ self:url_for("logout") }}')">
         <i class="nf nf-md-exit_run"></i>
       </button>

@@ -1,6 +1,7 @@
 {% local nelt = require "nelt.nelt" %}
+{% local nttp = require "nttp.nttp" %}
 
-{% local function transaction_form(tp: *nelt.Template, action: string, time: integer, name: string, amount: string, type: string, description: string) %}
+{% local function transaction_form(tp: *nelt.Template, self: *nttp.Server, action: string, time: integer, name: string, amount: string, type: string, description: string) %}
   <div id="transaction_form_popup"
        data-on-keydown__window="evt.key == 'Escape' && document.getElementById('transaction_form_popup').remove()">
     <style>
@@ -117,6 +118,9 @@
                  class="input"
                  value="{{ description }}" />
         </div>
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ nttp.csrf.generate_token(self) }}" />
       </div>
       <ul id="errors">
       </ul>
