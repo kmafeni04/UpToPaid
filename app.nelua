@@ -1,4 +1,7 @@
 local nttp = require "nttp.nttp"
+
+local Option = nttp.variant.Option
+
 local datastar = require "nttp-datastar-sdk.datastar"
 local norm = require "norm.norm"
 local nelt = require "nelt.nelt"
@@ -106,16 +109,16 @@ local Transactions, err = norm.Model.new(&db, "transactions", "Transactions", {
 })
 assert(err == "", err)
 
-app:before_filter(function(self: *nttp.Server): (boolean, nttp.Response)
+app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
   local logged_in_routes = map!(string, boolean, {
     [self:url_for("login")] = true,
     [self:url_for("signup")] = true,
     [self:url_for("forgot_password")] = true,
   })
   if self.session:get_val("current_user") ~= "" and logged_in_routes:has(self.req.current_path) then
-    return true, self:redirect(self:url_for("dashboard"))
+    return Option.Some(self:redirect(self:url_for("dashboard")))
   end
-  return false
+  return Option.None()
 end)
 
 app:get("index", "/", function(self: *nttp.Server): nttp.Response

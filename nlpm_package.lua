@@ -13,17 +13,17 @@ return {
     {
       name = "nttp",
       repo = "https://github.com/kmafeni04/nttp",
-      version = "#7b03ae14fb011d93173e8e20c752fc2c1426d13c",
+      version = "#969e07e4ad30483d3f7c823eac14475a8a41fa3e",
     },
     {
       name = "nttp-datastar-sdk",
       repo = "https://github.com/kmafeni04/nttp-datastar-sdk",
-      version = "#eaf6f0851e5049a2e7d774dd97c410a2ef8d4f8b",
+      version = "#07165aabfde1c7b876da4bbda4cd6ed1ecabfe66",
     },
     {
       name = "nttp-mail",
       repo = "https://github.com/kmafeni04/nttp-mail",
-      version = "#53236f5ab62fd8e7330c0196416f0c46fe0081be",
+      version = "#d85924fb850e3495994f26e97de683d822e397fe",
     },
     {
       name = "norm",
