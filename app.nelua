@@ -193,6 +193,13 @@ app:post("signup", "/signup", function(self: *nttp.Server): nttp.Response
   return auth_controller.signup_post(self, Users)
 end)
 
+app:post("signup_confirm", "/signup-confirm", function(self: *nttp.Server): nttp.Response
+  if not nttp.csrf.validate_token(self) then
+    return self:text(nttp.Status.Forbidden, "forbidden")
+  end
+  return auth_controller.signup_confirm(self, Users)
+end)
+
 app:post("logout", "/logout", function(self: *nttp.Server): nttp.Response
   local resp = datastar.csrf(self)
   if resp:is_some() then

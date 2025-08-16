@@ -1,0 +1,60 @@
+{% local nelt = require "nelt.nelt" %}
+{% local nttp = require "nttp.nttp" %}
+
+{% local auth = require ".components.auth-nelt" %}
+{% local layout = require ".layout-nelt" %}
+
+{% local function signup_confirm_content(tp: *nelt.Template, self: *nttp.Server) %}
+  {% local errors: sequence(string) %}
+  {% if self.req.params["errors"] ~= "" then %}
+    {% for error in self.req.params["errors"]:gmatch("([^\n]+\n)") do %}
+      {% errors:push(error) %}
+    {% end %}
+  {% end %}
+
+  <form action="{{ self:url_for("signup_confirm") }}" method="POST">
+    <h2>We've sent a code to your email to confirm your signup</h2>
+    <p>Please input it below</p>
+    <input type="hidden"
+           name="username"
+           value="{{ self.req.params["username"] }}" />
+    <input type="hidden" name="email" value="{{ self.req.params["email"] }}" />
+    <input type="hidden"
+           name="password"
+           value="{{ self.req.params["password"] }}" />
+    <input type="hidden"
+           name="csrf_token"
+           value="{{ nttp.csrf.generate_token(self) }}" />
+    <label for="signup-code">Code:</label>
+    <input class="input" type="text" name="signup-code", id="signup-code" />
+    {% if #errors > 0 then %}
+      <ul>
+        <style>
+          me {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-xs);
+            color: red;
+            list-style-position: inside;
+
+          }
+        </style>
+        {% for _, error in ipairs(errors) do %}
+          <li>{{ error }}</li>
+        {% end %}
+      </ul>
+    {% end %}
+    <button class="btn">Submit</button>
+  </form>
+
+{% end %}
+
+{% local function content(tp: *nelt.Template, self: *nttp.Server) %}
+  {% auth(tp, self, signup_confirm_content) %}
+{% end %}
+
+{% local function signup_confirm(tp: *nelt.Template, self: *nttp.Server) %}
+  {% layout(tp, "", content, self) %}
+{% end %}
+
+{% return signup_confirm %}

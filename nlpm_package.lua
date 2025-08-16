@@ -52,8 +52,8 @@ return {
     },
   },
   scripts = {
-    server_watch = "nelua --script server-watch.lua",
-    nelt_watch = "nelua --script nelt-watch.lua",
+    server = "nelua --script server-watch.lua",
+    nelt = "nelua --script nelt-watch.lua",
     test = "nelua app.nelua -DTEST",
   },
 }
