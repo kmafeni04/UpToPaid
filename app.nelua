@@ -150,14 +150,26 @@ app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
 end)
 
 app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
+  local current_user = self.session:get_val("current_user")
+
   local logged_in_routes = map!(string, boolean, {
     [self:url_for("login")] = true,
     [self:url_for("signup")] = true,
     [self:url_for("forgot_password")] = true,
   })
-  if self.session:get_val("current_user") ~= "" and logged_in_routes:has(self.req.current_path) then
+
+  local not_logged_in_routes = map!(string, boolean, {
+    [self:url_for("dashboard")] = true,
+    [self:url_for("goals")] = true,
+    [self:url_for("profile")] = true,
+  })
+
+  if current_user ~= "" and logged_in_routes:has(self.req.current_path) then
     return Option.Some(self:redirect(self:url_for("dashboard")))
+  elseif current_user == "" and not_logged_in_routes:has(self.req.current_path) then
+    return Option.Some(self:redirect(self:url_for("login")))
   end
+
   return Option.None()
 end)
 
@@ -238,10 +250,6 @@ app:get("home", "/home", function(self: *nttp.Server): nttp.Response
 end)
 
 app:get("dashboard", "/home/dashboard", function(self: *nttp.Server): nttp.Response
-  local current_user = self.session:get_val("current_user")
-  if current_user == "" then
-    return self:redirect(self:url_for("login"))
-  end
   local current_user_id = self.session:get_val("current_user_id")
   local dashboard = require ".templates.dashboard-nelt"
   local tp: nelt.Template
@@ -292,9 +300,6 @@ app:get("analytics_chart", "/analytics-chart", function(self: *nttp.Server): ntt
 end)
 
 app:get("goals", "/home/goals", function(self: *nttp.Server): nttp.Response
-  if self.session:get_val("current_user") == "" then
-    return self:redirect(self:url_for("login"))
-  end
   local goals = require ".templates.goals-nelt"
   local tp: nelt.Template
   goals(&tp, self)
@@ -302,9 +307,6 @@ app:get("goals", "/home/goals", function(self: *nttp.Server): nttp.Response
 end)
 
 app:get("profile", "/home/profile", function(self: *nttp.Server): nttp.Response
-  if self.session:get_val("current_user") == "" then
-    return self:redirect(self:url_for("login"))
-  end
   local profile = require ".templates.profile-nelt"
   local tp: nelt.Template
   profile(&tp, self)
