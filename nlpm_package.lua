@@ -28,7 +28,7 @@ return {
     {
       name = "norm",
       repo = "https://github.com/kmafeni04/norm",
-      version = "#921e3e3aed7b5752ddb6fca58b1339d531417bca",
+      version = "#0155543d24951fb112a3ea02e14bd3134023cf27",
     },
     {
       name = "nelt",

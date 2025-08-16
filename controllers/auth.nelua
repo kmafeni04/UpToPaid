@@ -3,8 +3,10 @@ local datastar = require "nttp-datastar-sdk.datastar"
 local norm = require "norm.norm"
 local nelt = require "nelt.nelt"
 local mail = require "nttp-mail.mail"
-local env, err= require("dotenv-nelua.dotenv").load()
-assert(err == "", err)
+local env, err = require("dotenv-nelua.dotenv").load()
+## if not PROD then
+  assert(err == "", err)
+## end
 
 local bcrypt = require "..utils.bcrypt"
 

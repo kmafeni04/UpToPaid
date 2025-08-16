@@ -1,9 +1,15 @@
 local nttp = require "nttp.nttp"
 
+## if PROD then
+  ## NORM_DB = "PG"
+## else
+  ## NORM_DB = "SQLITE"
+## end
+local norm = require "norm.norm"
+
 local Option = nttp.variant.Option
 
 local datastar = require "nttp-datastar-sdk.datastar"
-local norm = require "norm.norm"
 local nelt = require "nelt.nelt"
 
 local bcrypt = require ".utils.bcrypt"
@@ -13,30 +19,57 @@ local transactions_controller = require ".controllers.transactions"
 
 require "map-nelua.map"
 
+local env, err = require("dotenv-nelua.dotenv").load()
+## if not PROD then
+  assert(err == "", err)
+## end
+
+local schema = norm.Schema
+local type = schema.ColumnType
+
 ## if PROD then
--- postgres
+  local db, err = norm.Db.new({
+    name = env:get("PGDATABASE"),
+    user = env:get("PGUSER"),
+    password =  env:get("PGPASSWORD"),
+    host =  env:get("PGHOST"),
+    port = tointeger(env:get("PGPORT"))
+  })
+
+  local err = schema.migrate(db, map!(string, norm.Schema.MigrationFn, {
+    ["1755348573"] = function(db: norm.Db): string
+      local err = schema.create_table(db, "users", {
+        { "id",       type.serial, { primary_key = true } },
+        { "username", type.varchar, { unique = true } },
+        { "email",    type.varchar, { unique = true } },
+        { "password", type.varchar }
+      })
+      return err
+    end,
+
+    ["1755348585"] = function(db: norm.Db): string
+      local err = schema.create_table(db, "transactions", {
+        { "id",          type.serial, { primary_key = true } },
+        { "time",        type.integer },
+        { "name",        type.varchar },
+        { "amount",      type.real },
+        { "type",        type.varchar },
+        { "description", type.varchar },
+        { "user_id",     type.integer },
+      })
+      return err
+    end
+  }))
 ## else
   ## if TEST then
     local db, err = norm.Db.new({
-      kind = norm.DbKind.sqlite,
-      conn = {
-        sqlite = {
-          name = ":memory:"
-        }
-      }
+      name = ":memory:"
     })
   ## else
     local db, err = norm.Db.new({
-      kind = norm.DbKind.sqlite,
-      conn = {
-        sqlite = {
-          name = "app.db"
-        }
-      }
+      name = "app.db"
     })
   ## end
-  local schema = norm.Schema
-  local type = schema.ColumnType
 
   local err = schema.migrate(db, map!(string, norm.Schema.MigrationFn, {
     ["1750497533"] = function(db: norm.Db): string
@@ -73,8 +106,10 @@ require "map-nelua.map"
   }))
 ## end
 
+assert(err == "", err)
+
 local app = nttp.Server.new({
-  port = 8081
+  port = 8080
 })
 
 ## if not PROD then
