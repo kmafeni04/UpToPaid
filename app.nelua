@@ -31,8 +31,8 @@ local type = schema.ColumnType
   local db, err = norm.Db.new({
     name = env:get("PGDATABASE"),
     user = env:get("PGUSER"),
-    password =  env:get("PGPASSWORD"),
-    host =  env:get("PGHOST"),
+    password = env:get("PGPASSWORD"),
+    host = env:get("PGHOST"),
     port = tointeger(env:get("PGPORT"))
   })
 
@@ -145,11 +145,6 @@ local Transactions, err = norm.Model.new(&db, "transactions", "Transactions", {
 assert(err == "", err)
 
 app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
-  nttp.csrf.generate_token(self)
-  return Option.None()
-end)
-
-app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
   local current_user = self.session:get_val("current_user")
 
   local logged_in_routes = map!(string, boolean, {
@@ -170,6 +165,28 @@ app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
     return Option.Some(self:redirect(self:url_for("login")))
   end
 
+  return Option.None()
+end)
+
+-- CSRF check
+app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
+  nttp.csrf.generate_token(self)
+  if self.req.method == "POST" or self.req.method == "PUT" or self.req.method == "PATCH" or self.req.method == "DELETE" then
+    if self.req.headers:has("Content-Type") and (
+        self.req.headers["Content-Type"]:match("application/x%-www%-form%-urlencoded")
+        or self.req.headers["Content-Type"]:match("multipart/form%-data")
+      )
+    then
+      if not nttp.csrf.validate_token(self) then
+        return Option.Some(self:text(nttp.Status.Forbidden, "forbidden"))
+      end
+    else
+      local resp = datastar.csrf(self)
+      if resp:is_some() then
+        return Option.Some(resp:get_some())
+      end
+    end
+  end
   return Option.None()
 end)
 
@@ -199,24 +216,14 @@ app:get("signup", "/signup", function(self: *nttp.Server): nttp.Response
 end)
 
 app:post("signup", "/signup", function(self: *nttp.Server): nttp.Response
-  if not nttp.csrf.validate_token(self) then
-    return self:text(nttp.Status.Forbidden, "forbidden")
-  end
   return auth_controller.signup_post(self, Users)
 end)
 
 app:post("signup_confirm", "/signup-confirm", function(self: *nttp.Server): nttp.Response
-  if not nttp.csrf.validate_token(self) then
-    return self:text(nttp.Status.Forbidden, "forbidden")
-  end
   return auth_controller.signup_confirm(self, Users)
 end)
 
 app:post("logout", "/logout", function(self: *nttp.Server): nttp.Response
-  local resp = datastar.csrf(self)
-  if resp:is_some() then
-    return resp:get_some()
-  end
   return auth_controller.logout(self)
 end)
 
@@ -225,23 +232,14 @@ app:get("forgot_password", "/forgot-password", function(self: *nttp.Server): ntt
 end)
 
 app:post("forgot_password", "/forgot-password", function(self: *nttp.Server): nttp.Response
-  if not nttp.csrf.validate_token(self) then
-    return self:text(nttp.Status.Forbidden, "forbidden")
-  end
   return auth_controller.forgot_password_post(self, Users)
 end)
 
 app:post("password_reset_sent", "/forgot-password/code-sent", function(self: *nttp.Server): nttp.Response
-  if not nttp.csrf.validate_token(self) then
-    return self:text(nttp.Status.Forbidden, "forbidden")
-  end
   return auth_controller.password_reset_sent(self)
 end)
 
 app:post("password_reset", "/forgot-password/reset", function(self: *nttp.Server): nttp.Response
-  if not nttp.csrf.validate_token(self) then
-    return self:text(nttp.Status.Forbidden, "forbidden")
-  end
   return auth_controller.password_reset(self, Users)
 end)
 
@@ -270,9 +268,6 @@ app:get("new_transaction", "/transactions/create", function(self: *nttp.Server):
 end)
 
 app:post("transactions", "/transactions", function(self: *nttp.Server): nttp.Response
-  if not nttp.csrf.validate_token(self) then
-    return self:text(nttp.Status.Forbidden, "forbidden")
-  end
   return transactions_controller.transactions_post(self, Transactions)
 end)
 
@@ -281,17 +276,10 @@ app:get("update_transaction", "/transactions/:id/update", function(self: *nttp.S
 end)
 
 app:put("transaction", "/transactions/:id", function(self: *nttp.Server): nttp.Response
-  if not nttp.csrf.validate_token(self) then
-    return self:text(nttp.Status.Forbidden, "forbidden")
-  end
   return transactions_controller.transaction_put(self, Transactions)
 end)
 
 app:delete("transaction", "/transactions/:id", function(self: *nttp.Server): nttp.Response
-  local resp = datastar.csrf(self)
-  if resp:is_some() then
-    return resp:get_some()
-  end
   return transactions_controller.transaction_delete(self, Transactions)
 end)
 
