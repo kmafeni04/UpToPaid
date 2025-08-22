@@ -132,11 +132,11 @@
           <i class="nf nf-oct-goal"></i>
           <span data-show="$open" style="display: none;">Goals</span>
         </a>
-        <a href="{{ self:url_for("profile") }}"
-           title="Profile"
-           class="{{ self.req.current_path == self:url_for("profile") and 'active' or '' }}">
+        <a href="{{ self:url_for("account") }}"
+           title="Account"
+           class="{{ self.req.current_path == self:url_for("account") and 'active' or '' }}">
           <i class="nf nf-fa-user"></i>
-          <span data-show="$open" style="display: none;">Profile</span>
+          <span data-show="$open" style="display: none;">account</span>
         </a>
         <button title="Log out"
                 data-signals-csrf_token="'{{ nttp.csrf.generate_token(self) }}'"
@@ -222,9 +222,9 @@
          class="{{ self.req.current_path == self:url_for("goals") and 'active' or '' }}">
         <i class="nf nf-oct-goal"></i>
       </a>
-      <a href="{{ self:url_for("profile") }}"
-         title="Profile"
-         class="{{ self.req.current_path == self:url_for("profile") and 'active' or '' }}">
+      <a href="{{ self:url_for("account") }}"
+         title="Account"
+         class="{{ self.req.current_path == self:url_for("account") and 'active' or '' }}">
         <i class="nf nf-fa-user"></i>
       </a>
       <button title="Log out"

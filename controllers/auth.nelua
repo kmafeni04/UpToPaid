@@ -3,6 +3,7 @@ local datastar = require "nttp-datastar-sdk.datastar"
 local norm = require "norm.norm"
 local nelt = require "nelt.nelt"
 local mail = require "nttp-mail.mail"
+local html = require "html-nelua.html"
 local env, err = require("dotenv-nelua.dotenv").load()
 ## if not PROD then
   assert(err == "", err)
@@ -82,6 +83,7 @@ function auth_controller.login_post(self: *nttp.Server, Users: norm.Model)
     return self:html(nttp.Status.OK, tp:tostring())
   end
   self.session:set_val("current_user", username)
+  self.session:set_val("current_email", user:get_col("email"))
   self.session:set_val("current_user_id", user:get_col("id"))
   return self:redirect(self:url_for("dashboard"))
 end
@@ -111,7 +113,7 @@ function auth_controller.signup_post(self: *nttp.Server, Users: norm.Model): ntt
       username = username
     }))
     if err ~= "" then
-      io.stderr:write(err .. "\n")
+      io.stderr:write("USERNAME: " .. err .. "\n")
       return self:error()
     end
     if next(user.row) then
@@ -129,7 +131,7 @@ function auth_controller.signup_post(self: *nttp.Server, Users: norm.Model): ntt
       email = email
     }))
     if err ~= "" then
-      io.stderr:write(err .. "\n")
+      io.stderr:write("EMAIL: " ..  err .. "\n")
       return self:error()
     end
     if next(user.row) then
@@ -170,7 +172,7 @@ function auth_controller.signup_post(self: *nttp.Server, Users: norm.Model): ntt
 <p>If you did not try to signup, kindly ignore this email</p>]]):format(code),
   })
   if err ~= "" then
-    io.stderr:write(err .. "\n")
+    io.stderr:write("MAILER: " .. err .. "\n")
     return self:error()
   end
 
@@ -217,12 +219,18 @@ function auth_controller.signup_confirm(self: *nttp.Server, Users: norm.Model)
     return self:error()
   end
   self.session:set_val("current_user", username)
+  self.session:set_val("current_email", email)
   self.session:set_val("current_user_id", user:get_col("id"))
   return self:redirect(self:url_for("dashboard"))
 end
 
 function auth_controller.logout(self: *nttp.Server)
   local err = self.session:set_val("current_user", "")
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+  local err = self.session:set_val("current_email", "")
   if err ~= "" then
     io.stderr:write(err .. "\n")
     return self:error()
@@ -356,6 +364,65 @@ function auth_controller.password_reset(self: *nttp.Server, Users: norm.Model)
     password = bcrypt.encrypt(password)
   }))
   return self:redirect(self:url_for("login"))
+end
+
+function auth_controller.delete_account(self: *nttp.Server, Users: norm.Model)
+  local user, err = Users:find(map!(string, string, {
+    id = self.session:get_val("current_user_id")
+  }))
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+  local err = user:delete()
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+
+  return auth_controller.logout(self)
+end
+
+function auth_controller.change_username_get(self: *nttp.Server, Users: norm.Model)
+  local change_username = require "..templates.fragments.change-username"
+  return self:html(nttp.Status.OK, change_username(self))
+end
+
+function auth_controller.change_username_patch(self: *nttp.Server, Users: norm.Model)
+  return self:html(nttp.Status.OK, "Hello")
+end
+
+function auth_controller.cancel_change_username(self: *nttp.Server)
+  local get_username = require "..templates.fragments.get-username"
+  return self:html(nttp.Status.OK, get_username(self))
+end
+
+function auth_controller.change_email_get(self: *nttp.Server, Users: norm.Model)
+  local change_email = require "..templates.fragments.change-email"
+  return self:html(nttp.Status.OK, change_email(self))
+end
+
+function auth_controller.change_email_patch(self: *nttp.Server, Users: norm.Model)
+  return self:html(nttp.Status.OK, "Hello")
+end
+
+function auth_controller.cancel_change_email(self: *nttp.Server)
+  local get_email = require "..templates.fragments.get-email"
+  return self:html(nttp.Status.OK, get_email(self))
+end
+
+function auth_controller.change_password_get(self: *nttp.Server, Users: norm.Model)
+  local change_password = require "..templates.fragments.change-password"
+  return self:html(nttp.Status.OK, change_password(self))
+end
+
+function auth_controller.change_password_patch(self: *nttp.Server, Users: norm.Model)
+  return self:html(nttp.Status.OK, "Hello")
+end
+
+function auth_controller.cancel_change_password(self: *nttp.Server)
+  local get_password = require "..templates.fragments.get-password"
+  return self:html(nttp.Status.OK, get_password(self))
 end
 
 return auth_controller

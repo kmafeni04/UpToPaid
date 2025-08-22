@@ -130,6 +130,9 @@ picture {
   width: 100%;
 }
 
+p,
+a,
+label,
 button,
 input,
 select,
@@ -151,12 +154,6 @@ h1 {
 
 h2 {
   font-size: var(--font-md);
-}
-
-p,
-a,
-label {
-  font-size: var(--font-sm);
 }
 
 .btn {
@@ -191,6 +188,16 @@ label {
 .btn--inverse:hover {
   background-color: var(--font-color-inverse);
   color: var(--font-color);
+}
+
+.btn--warning {
+  background-color: red;
+  border-color: red;
+}
+
+.btn--warning:focus,
+.btn--warning:hover {
+  color: red;
 }
 
 .input {

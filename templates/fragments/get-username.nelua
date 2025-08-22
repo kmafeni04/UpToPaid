@@ -1,0 +1,37 @@
+local nttp = require "nttp.nttp"
+local html = require "html-nelua.html"
+
+local function get_username(self: *nttp.Server): string
+  local el = html.div(map!(string, string, {id = "change-username" }), (do
+    local els: sequence(html.Element)
+    els:push(html.style(nil, [[
+        me {
+          display: flex;
+          flex-direction: column;
+          gap: var(--gap-xs);
+        }
+    ]]))
+    els:push(html.div(nil, (do
+      local els: sequence(html.Element)
+      els:push(html.style(nil, [[
+        me {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--gap-xs);
+        }
+      ]]))
+      els:push(html.label(map!(string, string, { style = "font-size: var(--font-md); font-weight: 700"}), "Username"))
+      els:push(html.button(map!(string, string, {
+        class = "btn",
+        ["data-on-click"] = ("@get('%s')"):format(self:url_for("change_username"))
+      }), "Change"))
+      in els
+    end)))
+    els:push(html.p(nil, self.session:get_val("current_user")))
+    in els
+  end))
+  return el:tostring()
+end
+
+return get_username

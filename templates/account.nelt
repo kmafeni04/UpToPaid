@@ -1,0 +1,36 @@
+{% local nelt = require "nelt.nelt" %}
+{% local nttp = require "nttp.nttp" %}
+{% local layout = require ".layout-nelt" %}
+{% local home = require ".components.home-nelt" %}
+{% local get_username = require ".fragments.get-username" %}
+{% local get_email = require ".fragments.get-email" %}
+{% local get_password = require ".fragments.get-password" %}
+
+{% local function account_content(tp: *nelt.Template, self: *nttp.Server) %}
+  <div>
+    <style>
+      me {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-sm)
+      }
+    </style>
+
+    {{- get_username(self) }}
+    {{- get_email(self) }}
+    {{- get_password(self) }}
+    <button class="btn btn--warning"
+            data-on-click="confirm('Are you sure you would like to delete your account?\nThis action can not be reversed.') && @delete('{{ self:url_for("delete_account") }}')"
+            data-signals-csrf_token="'{{ nttp.csrf.generate_token(self) }}'">Delete Account</button>
+  </div>
+{% end %}
+
+{% local function content(tp: *nelt.Template, self: *nttp.Server) %}
+  {% home(tp, self, "Account", "", account_content) %}
+{% end %}
+
+{% local function account(tp: *nelt.Template, self: *nttp.Server) %}
+  {% layout(tp, "", content, self) %}
+{% end %}
+
+{% return account %}

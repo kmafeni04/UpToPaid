@@ -1,10 +1,12 @@
 local nttp = require "nttp.nttp"
 
-## if PROD then
-  ## NORM_DB = "PG"
-## else
-  ## NORM_DB = "SQLITE"
-## end
+##[[
+if PROD then
+  NORM_DB = "PG"
+else
+  NORM_DB = "SQLITE"
+end
+]]
 local norm = require "norm.norm"
 
 local Option = nttp.variant.Option
@@ -147,21 +149,21 @@ assert(err == "", err)
 app:before_filter(function(self: *nttp.Server): Option(nttp.Response)
   local current_user = self.session:get_val("current_user")
 
-  local logged_in_routes = map!(string, boolean, {
+  local should_be_logged_out_routes = map!(string, boolean, {
     [self:url_for("login")] = true,
     [self:url_for("signup")] = true,
     [self:url_for("forgot_password")] = true,
   })
 
-  local not_logged_in_routes = map!(string, boolean, {
+  local should_be_logged_in_routes = map!(string, boolean, {
     [self:url_for("dashboard")] = true,
     [self:url_for("goals")] = true,
-    [self:url_for("profile")] = true,
+    [self:url_for("account")] = true,
   })
 
-  if current_user ~= "" and logged_in_routes:has(self.req.current_path) then
+  if current_user ~= "" and should_be_logged_out_routes:has(self.req.current_path) then
     return Option.Some(self:redirect(self:url_for("dashboard")))
-  elseif current_user == "" and not_logged_in_routes:has(self.req.current_path) then
+  elseif current_user == "" and should_be_logged_in_routes:has(self.req.current_path) then
     return Option.Some(self:redirect(self:url_for("login")))
   end
 
@@ -294,11 +296,59 @@ app:get("goals", "/home/goals", function(self: *nttp.Server): nttp.Response
   return self:html(nttp.Status.OK, tp:tostring())
 end)
 
-app:get("profile", "/home/profile", function(self: *nttp.Server): nttp.Response
-  local profile = require ".templates.profile-nelt"
+app:get("account", "/home/account", function(self: *nttp.Server): nttp.Response
+  local current_user_id = self.session:get_val("current_user_id")
+  local user, err = Users:find(map!(string, string, {
+    id = current_user_id
+  }))
+  if err ~= "" then
+    io.stderr:write(err .. "\n")
+    return self:error()
+  end
+  local account = require ".templates.account-nelt"
   local tp: nelt.Template
-  profile(&tp, self)
+  account(&tp, self)
   return self:html(nttp.Status.OK, tp:tostring())
+end)
+
+app:delete("delete_account", "/home/account/delete", function(self: *nttp.Server): nttp.Response
+  return auth_controller.delete_account(self, Users)
+end)
+
+app:get("change_username", "/home/account/change-username", function(self: *nttp.Server): nttp.Response
+  return auth_controller.change_username_get(self, Users)
+end)
+
+app:patch("change_username", "/home/account/change-username", function(self: *nttp.Server): nttp.Response
+  return auth_controller.change_username_patch(self, Users)
+end)
+
+app:get("cancel_change_username", "/home/account/change-username/cancel", function(self: *nttp.Server): nttp.Response
+  return auth_controller.cancel_change_username(self)
+end)
+
+app:get("change_email", "/home/account/change-email", function(self: *nttp.Server): nttp.Response
+  return auth_controller.change_email_get(self, Users)
+end)
+
+app:patch("change_email", "/home/account/change-email", function(self: *nttp.Server): nttp.Response
+  return auth_controller.change_email_patch(self, Users)
+end)
+
+app:get("cancel_change_email", "/home/account/change-email/cancel", function(self: *nttp.Server): nttp.Response
+  return auth_controller.cancel_change_email(self)
+end)
+
+app:get("change_password", "/home/account/change-password", function(self: *nttp.Server): nttp.Response
+  return auth_controller.change_password_get(self, Users)
+end)
+
+app:patch("change_password", "/home/account/change-password", function(self: *nttp.Server): nttp.Response
+  return auth_controller.change_password_patch(self, Users)
+end)
+
+app:get("cancel_change_password", "/home/account/change-password/cancel", function(self: *nttp.Server): nttp.Response
+  return auth_controller.cancel_change_password(self)
 end)
 
 ## if TEST then

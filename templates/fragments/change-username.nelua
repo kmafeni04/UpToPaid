@@ -1,0 +1,67 @@
+local nttp = require "nttp.nttp"
+local html = require "html-nelua.html"
+
+local function change_username(self: *nttp.Server): string
+  local el = html.form(
+    map!(string, string, {
+        id = "change-username",
+        ["data-on-submit"] = ("@patch('%s')"):format(self:url_for("change_username")),
+      }),
+    (do
+      local els: sequence(html.Element)
+      els:push(html.style(nil, [[
+        me {
+          display: flex;
+          flex-direction: column;
+          gap: var(--gap-xs);
+        }
+      ]]))
+      els:push(html.label(map!(string, string, { style = "font-size: var(--font-md); font-weight: 700"}), "Username"))
+      els:push(html.div(nil, (do
+        local els: sequence(html.Element)
+        els:push(html.style(nil, [[
+          me {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-xs);
+          }
+        ]]))
+        els:push(html.input(map!(string, string, {
+          class = "input",
+          id = "username",
+          name = "username",
+          type = "text",
+          value = self.session:get_val("current_user")
+        })))
+        els:push(html.div(nil, (do
+          local els: sequence(html.Element)
+          els:push(html.style(nil, [[
+            me {
+              display: flex;
+              gap: var(--gap-xs);
+
+              &.btn{
+                width: 50%;
+              }
+            }
+          ]]))
+          els:push(html.button(map!(string, string, {
+            class = "btn",
+            type = "button",
+            ["data-on-click"] = ("@get('%s')"):format(self:url_for("cancel_change_username"))
+          }), "Cancel"))
+          els:push(html.button(map!(string, string, { class = "btn" }), "Submit"))
+
+          in els
+        end)))
+
+        in els
+      end)))
+
+      in els
+    end)
+  )
+  return el:tostring()
+end
+
+return change_username
