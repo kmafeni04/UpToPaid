@@ -16,7 +16,7 @@ local nelt = require "nelt.nelt"
 
 local bcrypt = require ".utils.bcrypt"
 
-local auth_controller = require ".controllers.auth"
+local user_controller = require ".controllers.user"
 local transactions_controller = require ".controllers.transactions"
 
 require "map-nelua.map"
@@ -203,46 +203,46 @@ app:get("index", "/", function(self: *nttp.Server): nttp.Response
 end)
 
 app:get("login", "/login", function(self: *nttp.Server): nttp.Response
-  return auth_controller.login_get(self)
+  return user_controller.login_get(self)
 end)
 
 app:post("login", "/login", function(self: *nttp.Server): nttp.Response
   if not nttp.csrf.validate_token(self) then
     return self:text(nttp.Status.Forbidden, "forbidden")
   end
-  return auth_controller.login_post(self, Users)
+  return user_controller.login_post(self, Users)
 end)
 
 app:get("signup", "/signup", function(self: *nttp.Server): nttp.Response
-  return auth_controller.signup_get(self)
+  return user_controller.signup_get(self)
 end)
 
 app:post("signup", "/signup", function(self: *nttp.Server): nttp.Response
-  return auth_controller.signup_post(self, Users)
+  return user_controller.signup_post(self, Users)
 end)
 
 app:post("signup_confirm", "/signup-confirm", function(self: *nttp.Server): nttp.Response
-  return auth_controller.signup_confirm(self, Users)
+  return user_controller.signup_confirm(self, Users)
 end)
 
 app:post("logout", "/logout", function(self: *nttp.Server): nttp.Response
-  return auth_controller.logout(self)
+  return user_controller.logout(self)
 end)
 
 app:get("forgot_password", "/forgot-password", function(self: *nttp.Server): nttp.Response
-  return auth_controller.forgot_password_get(self)
+  return user_controller.forgot_password_get(self)
 end)
 
 app:post("forgot_password", "/forgot-password", function(self: *nttp.Server): nttp.Response
-  return auth_controller.forgot_password_post(self, Users)
+  return user_controller.forgot_password_post(self, Users)
 end)
 
 app:post("password_reset_sent", "/forgot-password/code-sent", function(self: *nttp.Server): nttp.Response
-  return auth_controller.password_reset_sent(self)
+  return user_controller.password_reset_sent(self)
 end)
 
 app:post("password_reset", "/forgot-password/reset", function(self: *nttp.Server): nttp.Response
-  return auth_controller.password_reset(self, Users)
+  return user_controller.password_reset(self, Users)
 end)
 
 app:get("home", "/home", function(self: *nttp.Server): nttp.Response
@@ -312,43 +312,43 @@ app:get("account", "/home/account", function(self: *nttp.Server): nttp.Response
 end)
 
 app:delete("delete_account", "/home/account/delete", function(self: *nttp.Server): nttp.Response
-  return auth_controller.delete_account(self, Users)
+  return user_controller.delete_account(self, Users)
 end)
 
 app:get("change_username", "/home/account/change-username", function(self: *nttp.Server): nttp.Response
-  return auth_controller.change_username_get(self, Users)
+  return user_controller.change_username_get(self, Users)
 end)
 
 app:patch("change_username", "/home/account/change-username", function(self: *nttp.Server): nttp.Response
-  return auth_controller.change_username_patch(self, Users)
+  return user_controller.change_username_patch(self, Users)
 end)
 
 app:get("cancel_change_username", "/home/account/change-username/cancel", function(self: *nttp.Server): nttp.Response
-  return auth_controller.cancel_change_username(self)
+  return user_controller.cancel_change_username(self)
 end)
 
 app:get("change_email", "/home/account/change-email", function(self: *nttp.Server): nttp.Response
-  return auth_controller.change_email_get(self, Users)
+  return user_controller.change_email_get(self, Users)
 end)
 
 app:patch("change_email", "/home/account/change-email", function(self: *nttp.Server): nttp.Response
-  return auth_controller.change_email_patch(self, Users)
+  return user_controller.change_email_patch(self, Users)
 end)
 
 app:get("cancel_change_email", "/home/account/change-email/cancel", function(self: *nttp.Server): nttp.Response
-  return auth_controller.cancel_change_email(self)
+  return user_controller.cancel_change_email(self)
 end)
 
 app:get("change_password", "/home/account/change-password", function(self: *nttp.Server): nttp.Response
-  return auth_controller.change_password_get(self, Users)
+  return user_controller.change_password_get(self, Users)
 end)
 
 app:patch("change_password", "/home/account/change-password", function(self: *nttp.Server): nttp.Response
-  return auth_controller.change_password_patch(self, Users)
+  return user_controller.change_password_patch(self, Users)
 end)
 
 app:get("cancel_change_password", "/home/account/change-password/cancel", function(self: *nttp.Server): nttp.Response
-  return auth_controller.cancel_change_password(self)
+  return user_controller.cancel_change_password(self)
 end)
 
 ## if TEST then
